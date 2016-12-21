@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)">
+	<head>
+		<link rel="shortcut icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
+		<link rel="icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
+		<link rel="stylesheet" type="text/css" href="style.css">
+
+		<script src="../angular/angular.js"></script>
+		<script src="../diacritics/diacritics.js"></script>
+		<script src="script.js"></script>
+		<title>Hypercube Editor 1.0</title>
+	</head>
+	<body>
+		<div class="menu"><span class="view noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></div><br>
+		<div class="colors">
+			<img ng-repeat="colorItem in ::colors"
+					ng-click="toggleColor(colorItem, $event)"
+					ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
+					class="colorSelector"
+					height="40" width="40">
+		</div>
+
+		<div class="table">
+			<div class="row">
+				<span class="cell label grandTotal">Total: {{totals[color].total}}</span>
+				<span class="cell label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></span>
+			</div>
+			<div class="row" ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index">
+				<span class="cell label rowLabel">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></span>
+				<span class="cell container" ng-repeat="group in row" ng-init="colIndex = $index">
+					<div class="card noselect" ng-repeat="card in group track by $index" 
+							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
+							ng-mouseover="showCard(card, $event)" 
+							ng-mouseout="hideCard()"
+							ng-mousemove="repositionCard($event)">{{card}}</div>
+				</span>
+			</div>
+		</div>
+
+		<input type="file" id="upload" class="hide" onchange="angular.element(this).scope().readFile(event)">
+		<a id="download"></a>
+		
+		<span ng-class="{hidden: !(card.show && card.hover)}" id="mouseoverDisplay" ng-style="{left:card.left + 'px', top:card.top + 'px'}">{{card.text}}</span>
+	</body>
+</html>

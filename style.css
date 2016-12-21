@@ -1,0 +1,149 @@
+body {
+	background-color: #f2f2f2;
+}
+
+.table {
+	display: table;
+	table-layout: fixed;
+	border-spacing: 2px;
+	width: 100%;
+	height: 100%;
+	background-color: #595959;
+	border-radius: 8px 8px 0 8px;
+}
+
+.row {
+	display: table-row;
+}
+
+.cell {
+	display: table-cell;
+}
+
+.container {
+	overflow: hidden;
+	padding: 2px;
+	background-color: white;
+}
+
+.label {
+	color: white;
+	font-family: Tahoma;
+	font-size: 12px;
+	vertical-align: middle;
+	padding: 2px;
+	font-weight: bold;
+}
+
+.center {
+	text-align: center;
+}
+
+.left {
+	text-align: left;
+}
+
+.rowLabel {
+	width: 300px;
+}
+
+.card {
+	border: 1px solid #999999;
+	font-family: Tahoma;
+	font-size: 11px;
+	padding: 2px;
+	max-width: 100%;
+	overflow: hidden;
+    white-space: nowrap;
+}
+
+.card:not(:last-child) {
+	margin-bottom: 2px;
+}
+
+.grandTotal {
+	color: white;
+	font-family: Courier;
+	font-size: 14px;
+	font-style: italic;
+}
+
+.total {
+	padding: 0px 2px 0px 0px;
+	color: white;
+	font-family: Courier;
+	font-size: 10px;
+	font-style: italic;
+	float: right;
+	vertical-align: bottom;
+	text-decoration: underline; 
+}
+
+.colors {
+	text-align: center;
+	padding: 4px;
+}
+
+.colorSelector {
+	margin: 4px;
+}
+
+.menu {
+	float: right;
+}
+
+.view {
+	display: inline-block;
+	font-family: Courier;
+	font-size: 14px;
+	font-style: italic;
+	width: 100px;
+	text-align: center
+}
+
+.hide {
+	display: none;
+}
+
+#mouseoverDisplay {
+	display: block;
+	width: 300px;
+	white-space: pre-wrap;
+	position: fixed;
+	font-family: Tahoma;
+	font-size: 12px;
+	border-radius: 6px;
+	background-color: #595959;
+	color: white;
+	padding: 4px;
+}
+
+button {
+	border: 2px outset;
+	border-radius: 0;
+	font-family: Courier;
+	font-size: 12px;
+}
+
+button:active {
+	border: 2px inset;
+}
+
+button::-moz-focus-inner {
+	border: 0;
+}
+
+.hidden {
+	visibility: hidden;
+}
+
+.noselect {
+	cursor: default;
+	/* whatever */
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
