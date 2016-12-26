@@ -1,5 +1,5 @@
 body {
-	background-color: #f2f2f2;
+	background-color: #ededed;
 }
 
 .table {
@@ -22,8 +22,7 @@ body {
 
 .container {
 	overflow: hidden;
-	padding: 2px;
-	background-color: white;
+	background-color: #EDEDED;
 }
 
 .label {
@@ -48,13 +47,53 @@ body {
 }
 
 .card {
-	border: 1px solid #999999;
+	/*
+	border-bottom: 2px solid #999999;
+	border-left: 2px solid #999999;
+	border-radius: 4px;
+	*/
+	
 	font-family: Tahoma;
 	font-size: 11px;
 	padding: 2px;
-	max-width: 100%;
 	overflow: hidden;
     white-space: nowrap;
+	position: relative;
+}
+
+.tagContainer {
+	position: absolute;
+	top: 1px;
+	right: 1px;
+}
+
+/*
+.tagDot {
+	width: 8px;
+	height: 8px;
+	vertical-align: top;
+	display: inline-block;
+}
+*/
+
+.offColor {
+	vertical-align: top;
+}
+
+.tag {
+	margin-left: 1px;
+}
+
+.circle {
+	border-radius: 6px;
+}
+
+.red {
+	background-color: #38F3AB;
+}
+
+.blue {
+	background-color: #FFD700;
 }
 
 .card:not(:last-child) {
@@ -140,10 +179,7 @@ button::-moz-focus-inner {
 .noselect {
 	cursor: default;
 	/* whatever */
-	-webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;
 }

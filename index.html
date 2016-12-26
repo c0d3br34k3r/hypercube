@@ -5,9 +5,10 @@
 		<link rel="shortcut icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
 		<link rel="icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
 		<link rel="stylesheet" type="text/css" href="style.css">
-
-		<script src="../angular/angular.js"></script>
+		
 		<script src="../diacritics/diacritics.js"></script>
+		<script src="../contrast/contrast.js"></script>
+		<script src="../angular/angular.js"></script>
 		<script src="script.js"></script>
 		<title>Hypercube Editor 1.0</title>
 	</head>
@@ -26,14 +27,16 @@
 				<span class="cell label grandTotal">Total: {{totals[color].total}}</span>
 				<span class="cell label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></span>
 			</div>
-			<div class="row" ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index">
+			<div class="row" ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
 				<span class="cell label rowLabel">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></span>
 				<span class="cell container" ng-repeat="group in row" ng-init="colIndex = $index">
 					<div class="card noselect" ng-repeat="card in group track by $index" 
 							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
 							ng-mouseover="showCard(card, $event)" 
 							ng-mouseout="hideCard()"
-							ng-mousemove="repositionCard($event)">{{card}}</div>
+							ng-mousemove="repositionCard($event)"
+							ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">{{card}}<span class="tagContainer"><img class="offColor" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></span></span>
+					</div>
 				</span>
 			</div>
 		</div>

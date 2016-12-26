@@ -6,8 +6,56 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		$scope.cubeData = result.data;
 		$http.get('./categories.json', {responseType: 'json'}).then(function(result) {
 			setup(result.data);
+			$http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
+				loadJson(result.data);
+			});
 		});
 	});
+	
+	$scope.tags = {
+		'Courageous Outrider': ['human'],
+		'Riders of Gavony': ['human', 'evasion'],
+		'Drunau Corpse Trawler': ['zombie'],
+		'Crypt Champion': ['zombie'],
+		'Padeem, Consul of Innovation': ['artifact'],
+		'Glint-Nest Crane': ['artifact'],
+		'Compelling Deterrence': ['zombie']
+	};
+	
+	$scope.offColor = {
+		'Dauntless River Marshal': ['blue'],
+		'Shrieking Grotesque': ['black'],
+		'Steamcore Weird': ['red'],
+		'Drunau Corpse Trawler': ['black'],
+		'Frilled Oculus': ['green'],
+		'Revenant Patriarch': ['white'],
+		'Crypt Champion': ['red'],
+		'Shoreline Salvager': ['blue'],
+		'Obelisk of Alara': ['white', 'blue', 'black', 'red', 'green']
+	};
+	
+	$scope.tagColors = {
+		'human' : 'khaki',
+		'zombie' : 'darkolivegreen',
+		'evasion' : '#70B04A',
+		'artifact': 'lightsteelblue'
+	}
+	
+	$scope.getContrasting = function(card) {
+		if (!$scope.tags[card]) {
+			return undefined;
+		}
+		return Contrast.get($scope.tagColors[$scope.tags[card][0]]);
+	};
+	
+	$scope.rowNonempty = function(row) {
+		for (group of row) {
+			if (group.length) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	$scope.viewIndex = 0;
 	$scope.cube = [];
@@ -37,7 +85,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			return [];
 		});
 	}
-	
+
 	function createTypeMap(types) {
 		var typeMap = new Map();
 		for (var i = 0, len = types.length; i < len; i++) {
@@ -166,16 +214,16 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			reserve: flatten($scope.cube[1])
 		};
 		$scope.downloadElement.download = $scope.filename;
-		$scope.downloadElement.href = 'data:application/json;charset=utf-8;base64,' + btoa(JSON.stringify(contents));
+		$scope.downloadElement.href = 'data:application/json;charset=utf-8;base64,' + utf8ToBase64(JSON.stringify(contents));
 		$scope.downloadElement.click();
 	}
 	
 	$scope.listTrash = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + btoa($scope.trash.join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64($scope.trash.join('\n')));
 	}
 	
 	$scope.exportView = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + btoa(flatten($scope.view()).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(flatten($scope.view()).join('\n')));
 	}
 	
 	$scope.upload = function() {
@@ -197,8 +245,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 					if (!contents.main || !contents.reserve) {
 						alert('This JSON file is not in valid cube format.');
 					} else {
-						loadView(contents.main, 0);
-						loadView(contents.reserve, 1);
+						loadJson(contents);
 					}
 					break;
 				default:
@@ -209,16 +256,21 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		reader.readAsText(file, 'UTF-8');
 	};
 	
+	function loadJson(contents) {
+		loadView(contents.main, 0);
+		loadView(contents.reserve, 1);
+	}
+	
 	function loadView(cards, viewIndex) {
 		var badCards = [];
-		for (var line of cards) {
-			var cardName = Diacritics.remove(line.trim().toLowerCase());
+		for (var item of cards) {
+			var cardName = Diacritics.remove(item.trim().toLowerCase());
 			if (!cardName || cardName.startsWith('#')) {
 				continue;
 			}
 			var card = $scope.cubeData[cardName];
 			if (card == null) {
-				badCards.push(cardName);
+				badCards.push(item.trim());
 				continue;
 			}
 			if (loaded.has(cardName)) {
@@ -330,6 +382,10 @@ var Color = {
 	BLACK: 0x4,
 	RED: 0x8,
 	GREEN: 0x10
+}
+
+function utf8ToBase64(str) {
+	return btoa(unescape(encodeURIComponent(str)));
 }
 
 function getBits(items, itemType) {
