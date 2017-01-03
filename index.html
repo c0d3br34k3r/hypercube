@@ -13,15 +13,17 @@
 		<title>Hypercube Editor 1.0</title>
 	</head>
 	<body>
-		<div class="menu"><span class="view noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></div><br>
-		<div class="colors">
-			<img ng-repeat="colorItem in ::colors"
+		<div class="menuBar">
+			
+			<span class="leftMenuBar"></span><!-- nospace 
+			--><span class="colors"><img ng-repeat="colorItem in ::colors"
 					ng-click="toggleColor(colorItem, $event)"
 					ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
 					class="colorSelector"
-					height="40" width="40">
+					height="40" width="40"></span><!-- nospace
+			--><span class="menu"><span class="view noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></span>
+			
 		</div>
-
 		<div class="table">
 			<div class="row">
 				<span class="cell label grandTotal">Total: {{totals[color].total}}</span>
@@ -43,7 +45,6 @@
 
 		<input type="file" id="upload" class="hide" onchange="angular.element(this).scope().readFile(event)">
 		<a id="download"></a>
-		
 		<span ng-class="{hidden: !(card.show && card.hover)}" id="mouseoverDisplay" ng-style="{left:card.left + 'px', top:card.top + 'px'}">{{card.text}}</span>
 	</body>
 </html>

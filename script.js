@@ -6,9 +6,9 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		$scope.cubeData = result.data;
 		$http.get('./categories.json', {responseType: 'json'}).then(function(result) {
 			setup(result.data);
-			$http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
-				loadJson(result.data);
-			});
+			// $http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
+				// loadJson(result.data);
+			// });
 		});
 	});
 	
@@ -31,7 +31,8 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'Revenant Patriarch': ['white'],
 		'Crypt Champion': ['red'],
 		'Shoreline Salvager': ['blue'],
-		'Obelisk of Alara': ['white', 'blue', 'black', 'red', 'green']
+		'Obelisk of Alara': ['white', 'blue', 'black', 'red', 'green'],
+		'Warden of the First Tree': ['white', 'black']
 	};
 	
 	$scope.tagColors = {
@@ -40,6 +41,8 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'evasion' : '#70B04A',
 		'artifact': 'lightsteelblue'
 	}
+	
+	$scope.mouseoverDisplay = document.getElementById('mouseoverDisplay');
 	
 	$scope.getContrasting = function(card) {
 		if (!$scope.tags[card]) {
@@ -213,9 +216,10 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			main: flatten($scope.cube[0]),
 			reserve: flatten($scope.cube[1])
 		};
-		$scope.downloadElement.download = $scope.filename;
-		$scope.downloadElement.href = 'data:application/json;charset=utf-8;base64,' + utf8ToBase64(JSON.stringify(contents));
-		$scope.downloadElement.click();
+		var download = document.getElementById('download');
+		download.download = $scope.filename;
+		download.href = 'data:application/json;charset=utf-8;base64,' + utf8ToBase64(JSON.stringify(contents));
+		download.click();
 	}
 	
 	$scope.listTrash = function() {
@@ -227,7 +231,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	}
 	
 	$scope.upload = function() {
-		$scope.uploadElement.click();
+		document.getElementById('upload').click();
 	};
 	
 	$scope.readFile = function(event) {
@@ -297,7 +301,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	}
 	
 	// MOUSEOVER CARD TEXT
-	
+
 	$scope.card = {
 		text: null,
 		show: false,
@@ -305,14 +309,14 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		top: 0,
 		left: 0
 	};
-	
+
 	$scope.showCard = function(card, e) {
 		$scope.card.hover = true;
 		var card = $scope.cubeData[Diacritics.remove(card).toLowerCase()];
-		$scope.card.text = card ? card.text : 'CARD TEXT NOT FOUND';
+		$scope.card.text = card.text || 'CARD TEXT NOT FOUND';
 		$scope.repositionCard(e);
 	};
-	
+
 	$scope.hideCard = function() {
 		$scope.card.hover = false;
 	};
@@ -320,12 +324,14 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	$scope.repositionCard = function(e) {
 		var x = e.clientX;
 		var y = e.clientY;
-		var width = mouseoverDisplay.offsetWidth;
-		var height = mouseoverDisplay.offsetHeight;
-		$scope.card.left = x + width + PADDING < window.innerWidth || x < window.innerWidth / 2
+		var width = $scope.mouseoverDisplay.offsetWidth;
+		var height = $scope.mouseoverDisplay.offsetHeight;
+		var winHeight = document.documentElement.clientHeight;
+		var winWidth = document.documentElement.clientWidth;
+		$scope.card.left = x + width + PADDING <= winWidth || x < winWidth / 2
 				? x + PADDING
 				: x - width - PADDING;
-		$scope.card.top = y + height + PADDING < window.innerHeight || y < window.innerHeight / 2
+		$scope.card.top = y + height + PADDING <= winHeight || y < winHeight / 2
 				? y + PADDING
 				: y - height;
 	}
@@ -344,6 +350,39 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	
 }]);
 
+app.directive('popup', function($parse) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			var popupData = $parse(attrs['popup']);
+			element.css('position', 'fixed');
+			var padding = 0;
+			setPopupData(element, popupData(), 0);
+			scope.$watch(popupData, function(oldData, newData) {
+				setPopupData(element, newData, 0);
+			}, true);
+		}
+	};
+});
+
+function setPopupData(element, popupData, padding) {
+	var popupWidth = element[0].offsetWidth;
+	var popupHeight = element[0].offsetHeight;
+	var winHeight = document.documentElement.clientHeight;
+	var winWidth = document.documentElement.clientWidth;
+	
+	element.css('left', computeCoord(popupData.x, popupWidth, winWidth, padding) + 'px');
+	element.css('top', computeCoord(popupData.y, popupHeight, winHeight, padding) + 'px');
+	element.css('visibility', popupData.show ? 'visible' : 'hidden');
+}
+
+function computeCoord(pos, popupDim, winDim, padding) {
+	return pos + popupDim + padding <= winDim || pos < winDim / 2
+			? pos + padding
+			: pos - popupDim - padding;
+}
+
+/*
 app.directive('id', function() {
 	return {
 		restrict: 'A',
@@ -362,6 +401,7 @@ app.directive('id', function() {
 		}
 	};
 });
+*/
 
 // pseudo-enums
 
