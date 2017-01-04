@@ -3,8 +3,7 @@ body {
 	margin: 4px;
 }
 
-.table {
-	display: table;
+.view {
 	table-layout: fixed;
 	border-spacing: 2px;
 	width: 100%;
@@ -12,17 +11,11 @@ body {
 	border-radius: 8px 8px 0 8px;
 }
 
-.row {
-	display: table-row;
-}
-
-.cell {
-	display: table-cell;
-}
-
 .container {
+	vertical-align: top;
 	overflow: hidden;
 	background-color: #EDEDED;
+	padding: 0;
 }
 
 .label {
@@ -42,11 +35,8 @@ body {
 	text-align: left;
 }
 
-.rowLabel {
-	width: 300px;
-}
-
 .card {
+	
 	/*
 	border-bottom: 2px solid #999999;
 	border-left: 2px solid #999999;
@@ -61,13 +51,14 @@ body {
 	position: relative;
 }
 
-.tagContainer {
+.off-colors {
+	display: inline-block;
 	position: absolute;
 	top: 1px;
 	right: 1px;
 }
 
-.offColor {
+.off-color {
 	vertical-align: top;
 }
 
@@ -75,7 +66,8 @@ body {
 	margin-bottom: 2px;
 }
 
-.grandTotal {
+.grand-total {
+	text-align: left;
 	color: white;
 	font-family: Courier;
 	font-size: 14px;
@@ -83,50 +75,54 @@ body {
 }
 
 .total {
-	padding: 0px 2px 0px 0px;
-	color: white;
+	text-align: center;
 	font-family: Courier;
 	font-size: 10px;
-	font-style: italic;
 	float: right;
 	vertical-align: bottom;
-	text-decoration: underline; 
-}
-
-.menuBar {
-	vertical-align: top;
-}
-
-.leftMenuBar {
-	border: 1px dotted black;
-	box-sizing: border-box;
-	display: inline-block;
-	width: 25%;
-}
-
-.colors {
-	border: 1px dotted black;
-	box-sizing: border-box;
-	display: inline-block;
-	text-align: center;
-	vertical-align: middle;
-	width: 50%;
-}
-
-.colorSelector {
-	margin: 4px;
+	border-radius: 4px;
+	padding: 0 1px;
+	color: lime;
+	border: 1px solid white;
+	min-width: 12px;
 }
 
 .menu {
-	border: 1px dotted black;
-	box-sizing: border-box;
-	display: inline-block;
-	width: 25%;
-	
+	display: flex;
+	margin: 8px 0px 8px 0px;
+}
+
+.menu-item {
+	align-items: center;
+}
+
+.menu-left, .menu-right{
+	flex: 1;
+	display: flex;
+}
+
+.menu-left {
+
+}
+
+.menu-center {
+	white-space: nowrap;
+	text-align: center;
+}
+
+.menu-right {
+
+}
+
+.colorSelector {
 	vertical-align: middle;
 }
 
-.view {
+.colorSelector:not(:last-child) {
+	margin-right: 8px;
+}
+
+.view-indicator {
 	display: inline-block;
 	font-family: Courier;
 	font-size: 14px;
@@ -135,12 +131,7 @@ body {
 	text-align: center
 }
 
-.hide {
-	display: none;
-}
-
-#mouseoverDisplay {
-	display: block;
+#mouseover-display {
 	width: 25vw;
 	min-width: 200px;
 	white-space: pre-wrap;
@@ -166,6 +157,10 @@ button:active {
 
 button::-moz-focus-inner {
 	border: 0;
+}
+
+.nodisplay {
+	display: none;
 }
 
 .hidden {

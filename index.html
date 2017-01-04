@@ -1,50 +1,63 @@
 <!DOCTYPE html>
 <meta charset="UTF-8">
 <html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)">
-	<head>
-		<link rel="shortcut icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
-		<link rel="icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
-		<link rel="stylesheet" type="text/css" href="style.css">
-		
-		<script src="../diacritics/diacritics.js"></script>
-		<script src="../contrast/contrast.js"></script>
-		<script src="../angular/angular.js"></script>
-		<script src="script.js"></script>
-		<title>Hypercube Editor 1.0</title>
-	</head>
-	<body>
-		<div class="menuBar">
-			
-			<span class="leftMenuBar"></span><!-- nospace 
-			--><span class="colors"><img ng-repeat="colorItem in ::colors"
-					ng-click="toggleColor(colorItem, $event)"
-					ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
-					class="colorSelector"
-					height="40" width="40"></span><!-- nospace
-			--><span class="menu"><span class="view noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></span>
-			
-		</div>
-		<div class="table">
-			<div class="row">
-				<span class="cell label grandTotal">Total: {{totals[color].total}}</span>
-				<span class="cell label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></span>
-			</div>
-			<div class="row" ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
-				<span class="cell label rowLabel">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></span>
-				<span class="cell container" ng-repeat="group in row" ng-init="colIndex = $index">
-					<div class="card noselect" ng-repeat="card in group track by $index" 
-							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
-							ng-mouseover="showCard(card, $event)" 
-							ng-mouseout="hideCard()"
-							ng-mousemove="repositionCard($event)"
-							ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">{{card}}<span class="tagContainer"><img class="offColor" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></span></span>
-					</div>
-				</span>
-			</div>
-		</div>
 
-		<input type="file" id="upload" class="hide" onchange="angular.element(this).scope().readFile(event)">
-		<a id="download"></a>
-		<span ng-class="{hidden: !(card.show && card.hover)}" id="mouseoverDisplay" ng-style="{left:card.left + 'px', top:card.top + 'px'}">{{card.text}}</span>
-	</body>
+<head>
+
+<link rel="shortcut icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<script src="../diacritics/diacritics.js"></script>
+<script src="../contrast/contrast.js"></script>
+<script src="../angular/angular.js"></script>
+<script src="script.js"></script>
+<title>Hypercube Editor 1.0</title>
+	
+</head>
+
+<body>
+
+<div class="menu">
+	
+	<span class="menu-item menu-left animate"></span>
+	<span class="menu-item menu-center"><img ng-repeat="colorItem in ::colors"
+			ng-click="toggleColor(colorItem, $event)"
+			ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
+			class="colorSelector"
+			height="40" width="40"></span>
+	<span class="menu-item menu-right"><span class="view-indicator noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></span>
+	
+</div>
+
+<table class="view">
+	<thead>
+		<tr>
+			<th class="label grand-total">Total: {{totals[color].total}}</th>
+			<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
+			<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
+			<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
+				<!-- , 'color': getContrasting(card) -->
+				<div class="card noselect" ng-repeat="card in group track by $index" 
+						ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
+						ng-mouseover="showCard(card, $event)" 
+						ng-mouseout="hideCard()"
+						ng-mousemove="repositionCard($event)"
+						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white'}">{{card}}<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div></div>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<input type="file" id="upload" class="nodisplay" onchange="angular.element(this).scope().readFile(event)">
+<a class="nodisplay" id="download"></a>
+<div ng-class="{hidden: !(card.show && card.hover)}" id="mouseover-display" ng-style="{left:card.left + 'px', top:card.top + 'px'}">{{card.text}}</div>
+
+</body>
+	
 </html>

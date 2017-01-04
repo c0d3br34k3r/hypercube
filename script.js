@@ -6,9 +6,9 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		$scope.cubeData = result.data;
 		$http.get('./categories.json', {responseType: 'json'}).then(function(result) {
 			setup(result.data);
-			// $http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
-				// loadJson(result.data);
-			// });
+			$http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
+				loadJson(result.data);
+			});
 		});
 	});
 	
@@ -42,7 +42,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'artifact': 'lightsteelblue'
 	}
 	
-	$scope.mouseoverDisplay = document.getElementById('mouseoverDisplay');
+	$scope.mouseoverDisplay = document.getElementById('mouseover-display');
 	
 	$scope.getContrasting = function(card) {
 		if (!$scope.tags[card]) {
