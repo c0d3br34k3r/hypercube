@@ -45,10 +45,11 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	$scope.mouseoverDisplay = document.getElementById('mouseover-display');
 	
 	$scope.getContrasting = function(card) {
-		if (!$scope.tags[card]) {
-			return undefined;
+		var tags = $scope.tags[card];
+		if (tags) {
+			return getContrasting($scope.tagColors[$scope.tags[card][0]]);
 		}
-		return Contrast.get($scope.tagColors[$scope.tags[card][0]]);
+		return undefined;
 	};
 	
 	$scope.rowNonempty = function(row) {

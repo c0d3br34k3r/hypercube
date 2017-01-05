@@ -9,8 +9,8 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 
 <script src="../diacritics/diacritics.js"></script>
-<script src="../contrast/contrast.js"></script>
 <script src="../angular/angular.js"></script>
+<script src="contrast.js"></script>
 <script src="script.js"></script>
 <title>Hypercube Editor 1.0</title>
 	
@@ -20,7 +20,7 @@
 
 <div class="menu">
 	
-	<span class="menu-item menu-left animate"></span>
+	<span class="menu-item menu-left"></span>
 	<span class="menu-item menu-center"><img ng-repeat="colorItem in ::colors"
 			ng-click="toggleColor(colorItem, $event)"
 			ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
@@ -41,13 +41,12 @@
 		<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
 			<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
 			<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
-				<!-- , 'color': getContrasting(card) -->
 				<div class="card noselect" ng-repeat="card in group track by $index" 
 						ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
 						ng-mouseover="showCard(card, $event)" 
 						ng-mouseout="hideCard()"
 						ng-mousemove="repositionCard($event)"
-						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white'}">{{card}}<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div></div>
+						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">{{card}}<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div></div>
 				</div>
 			</td>
 		</tr>

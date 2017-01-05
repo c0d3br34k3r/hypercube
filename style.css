@@ -1,5 +1,5 @@
 body {
-	background-color: #ededed;
+	background-color: #e8e8e8;
 	margin: 4px;
 }
 
@@ -14,7 +14,7 @@ body {
 .container {
 	vertical-align: top;
 	overflow: hidden;
-	background-color: #EDEDED;
+	background-color: #e8e8e8;
 	padding: 0;
 }
 
@@ -36,19 +36,32 @@ body {
 }
 
 .card {
-	
-	/*
-	border-bottom: 2px solid #999999;
-	border-left: 2px solid #999999;
-	border-radius: 4px;
+
+	/* 	
+	padding-bottom: 4px;
+	background-image: linear-gradient(to right, white 50%, #595959 50%);
+	background-position: left bottom;
+	background-size: 4px 2px;
+	background-repeat: repeat-x;
 	*/
-	
+
 	font-family: Tahoma;
 	font-size: 11px;
 	padding: 2px;
 	overflow: hidden;
     white-space: nowrap;
 	position: relative;
+}
+
+.card:not(:last-child) {
+	/*
+	padding-bottom: 3px;
+	background-image: url(border2.svg);
+	background-position: bottom;
+	background-size: 4px 2px;
+	background-repeat: repeat-x;
+	*/
+	border-bottom: 2px solid #e8e8e8;
 }
 
 .off-colors {
@@ -60,10 +73,6 @@ body {
 
 .off-color {
 	vertical-align: top;
-}
-
-.card:not(:last-child) {
-	margin-bottom: 2px;
 }
 
 .grand-total {
