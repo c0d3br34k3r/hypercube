@@ -19,7 +19,6 @@
 <body>
 
 <div class="menu">
-	
 	<span class="menu-item menu-left"></span>
 	<span class="menu-item menu-center"><img ng-repeat="colorItem in ::colors"
 			ng-click="toggleColor(colorItem, $event)"
@@ -27,11 +26,10 @@
 			class="colorSelector"
 			height="40" width="40"></span>
 	<span class="menu-item menu-right"><span class="view-indicator noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></span>
-	
 </div>
 
-<table class="view">
-	<thead>
+<table class="view" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
+	<thead >
 		<tr>
 			<th class="label grand-total">Total: {{totals[color].total}}</th>
 			<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
@@ -46,7 +44,9 @@
 						ng-mouseover="showCard(card, $event)" 
 						ng-mouseout="hideCard()"
 						ng-mousemove="repositionCard($event)"
-						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">{{card}}<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div></div>
+						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
+					{{card}}
+					<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div>
 				</div>
 			</td>
 		</tr>

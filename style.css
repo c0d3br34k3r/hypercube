@@ -1,5 +1,5 @@
 body {
-	background-color: #e8e8e8;
+	background-color: #EDEDED;
 	margin: 4px;
 }
 
@@ -7,14 +7,22 @@ body {
 	table-layout: fixed;
 	border-spacing: 2px;
 	width: 100%;
-	background-color: #595959;
 	border-radius: 8px 8px 0 8px;
+	background-color: black;
+}
+
+.view-main {
+	background-color: #664400;
+}
+
+.view-reserve {
+	background-color: #4F5764;
 }
 
 .container {
 	vertical-align: top;
 	overflow: hidden;
-	background-color: #e8e8e8;
+	background-color: #EDEDED;
 	padding: 0;
 }
 
@@ -61,7 +69,9 @@ body {
 	background-size: 4px 2px;
 	background-repeat: repeat-x;
 	*/
-	border-bottom: 2px solid #e8e8e8;
+	
+	border-bottom: 2px solid #D8D8D8;
+	/* margin-bottom: 1px; */
 }
 
 .off-colors {
@@ -91,7 +101,7 @@ body {
 	vertical-align: bottom;
 	border-radius: 4px;
 	padding: 0 1px;
-	color: lime;
+	color: white;
 	border: 1px solid white;
 	min-width: 12px;
 }
