@@ -11,6 +11,10 @@ body {
 	background-color: black;
 }
 
+table, tbody, tr, td {
+	overflow: visible;
+}
+
 .view-main {
 	background-color: #664400;
 }
@@ -21,7 +25,6 @@ body {
 
 .container {
 	vertical-align: top;
-	overflow: hidden;
 	background-color: #EDEDED;
 	padding: 0;
 }
@@ -43,7 +46,7 @@ body {
 	text-align: left;
 }
 
-.card {
+.card-holder {
 
 	/* 	
 	padding-bottom: 4px;
@@ -55,13 +58,18 @@ body {
 
 	font-family: Tahoma;
 	font-size: 11px;
-	padding: 2px;
-	overflow: hidden;
     white-space: nowrap;
 	position: relative;
+	background-color: white;
 }
 
-.card:not(:last-child) {
+.card {
+	padding: 2px;
+	overflow: hidden;
+}
+
+
+.card-holder:not(:last-child) {
 	/*
 	padding-bottom: 3px;
 	background-image: url(border2.svg);
@@ -72,6 +80,45 @@ body {
 	
 	border-bottom: 2px solid #D8D8D8;
 	/* margin-bottom: 1px; */
+}
+
+.edit-holder {
+	position:relative;
+	height: 0;
+	width: 0;
+}
+
+.card-edit {
+	background-color: white;
+	font-family: Tahoma;
+	font-size: 11px;
+	padding: 2px;
+    white-space: nowrap;
+	position: absolute;
+	border: 2px solid black;
+	border-radius: 8px 0 8px 8px;
+	width: 200px;
+	height: 100px;
+	right: 0px;
+	top: -2px;
+	z-index: 99;
+}
+
+.quantity {
+	text-align: center;
+	display: inline-block;
+	font-size: 12px;
+	font-family: Courier;
+	font-weight: bold;
+	margin-right: 4px;
+	max-height: 12px;
+}
+
+input {
+	font-family: Courier;
+	font-size: 12px;
+	font-weight: bold;
+	width: 32px;
 }
 
 .off-colors {
@@ -99,11 +146,11 @@ body {
 	font-size: 10px;
 	float: right;
 	vertical-align: bottom;
+	border: 1px solid white;
 	border-radius: 4px;
 	padding: 0 1px;
 	color: white;
-	border: 1px solid white;
-	min-width: 12px;
+	min-width: 2ch;
 }
 
 .menu {
@@ -150,17 +197,26 @@ body {
 	text-align: center
 }
 
-#mouseover-display {
+.cardText {
 	width: 25vw;
 	min-width: 200px;
 	white-space: pre-wrap;
-	position: fixed;
 	font-family: Tahoma;
 	font-size: 12px;
 	border-radius: 6px;
 	background-color: #595959;
 	color: white;
 	padding: 4px;
+}
+
+.tagMenu {
+	width: 15vw;
+	min-width: 150px;
+	font-family: Tahoma;
+	font-size: 12px;
+	background-color: white;
+	padding: 4px;
+	border: 1px solid black;
 }
 
 button {

@@ -12,6 +12,11 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		});
 	});
 	
+	$scope.setEditing = function(e, card) {
+		$scope.editing = card;
+		e.preventDefault();
+	}
+
 	$scope.tags = {
 		'Courageous Outrider': ['human'],
 		'Riders of Gavony': ['human', 'evasion'],
@@ -41,9 +46,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'evasion' : '#70B04A',
 		'artifact': 'lightsteelblue'
 	}
-	
-	$scope.mouseoverDisplay = document.getElementById('mouseover-display');
-	
+
 	$scope.getContrasting = function(card) {
 		var tags = $scope.tags[card];
 		if (tags) {
@@ -60,6 +63,8 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		}
 		return false;
 	}
+	
+	$scope.quantities = {};
 	
 	$scope.viewIndex = 0;
 	$scope.cube = [];
@@ -307,35 +312,17 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		text: null,
 		show: false,
 		hover: false,
-		top: 0,
-		left: 0
 	};
 
 	$scope.showCard = function(card, e) {
 		$scope.card.hover = true;
 		var card = $scope.cubeData[Diacritics.remove(card).toLowerCase()];
 		$scope.card.text = card.text || 'CARD TEXT NOT FOUND';
-		$scope.repositionCard(e);
 	};
 
 	$scope.hideCard = function() {
 		$scope.card.hover = false;
 	};
-	
-	$scope.repositionCard = function(e) {
-		var x = e.clientX;
-		var y = e.clientY;
-		var width = $scope.mouseoverDisplay.offsetWidth;
-		var height = $scope.mouseoverDisplay.offsetHeight;
-		var winHeight = document.documentElement.clientHeight;
-		var winWidth = document.documentElement.clientWidth;
-		$scope.card.left = x + width + PADDING <= winWidth || x < winWidth / 2
-				? x + PADDING
-				: x - width - PADDING;
-		$scope.card.top = y + height + PADDING <= winHeight || y < winHeight / 2
-				? y + PADDING
-				: y - height;
-	}
 
 	$scope.keydown = function(event) {
 		if (event.key == 'Shift') {
@@ -349,60 +336,63 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		}
 	}
 	
+	// TAG MENU
+	
+	$scope.tagMenuOpen = false;
+	
+	$scope.showTagMenu = function(e) {
+		$scope.tagMenuOpen = true;
+		$scope.tagMenu.setPosition(e.clientX, e.clientY);
+		e.preventDefault();
+	}
+	
+	$scope.hideTagMenu = function() {
+		$scope.tagMenuOpen = false;
+	}
+	
 }]);
 
 app.directive('popup', function($parse) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-			var popupData = $parse(attrs['popup']);
+			var popupName = attrs['popup'];
 			element.css('position', 'fixed');
-			var padding = 0;
-			setPopupData(element, popupData(), 0);
-			scope.$watch(popupData, function(oldData, newData) {
-				setPopupData(element, newData, 0);
-			}, true);
+			var padding = Number(attrs['popupPadding'] || 0);
+			scope[popupName] = {
+				setPosition: function(x, y) {
+					var popupWidth = element[0].offsetWidth;
+					var popupHeight = element[0].offsetHeight;
+					var winHeight = document.documentElement.clientHeight;
+					var winWidth = document.documentElement.clientWidth;
+					element.css('left', computeCoord(x, popupWidth, winWidth, padding) + 'px');
+					element.css('top', computeCoord(y, popupHeight, winHeight, padding) + 'px');
+				}
+			};
 		}
 	};
 });
 
-function setPopupData(element, popupData, padding) {
-	var popupWidth = element[0].offsetWidth;
-	var popupHeight = element[0].offsetHeight;
-	var winHeight = document.documentElement.clientHeight;
-	var winWidth = document.documentElement.clientWidth;
-	
-	element.css('left', computeCoord(popupData.x, popupWidth, winWidth, padding) + 'px');
-	element.css('top', computeCoord(popupData.y, popupHeight, winHeight, padding) + 'px');
-	element.css('visibility', popupData.show ? 'visible' : 'hidden');
-}
+app.directive('ngRightClick', function($parse) {
+    return function(scope, element, attrs) {
+		var expr = $parse(attrs['ngRightClick']);
+		element[0].addEventListener('contextmenu', function(e) {
+			scope.$apply(function() {
+				expr(scope, {$event: e});
+			});
+		}, false);
+    };
+});
 
 function computeCoord(pos, popupDim, winDim, padding) {
 	return pos + popupDim + padding <= winDim || pos < winDim / 2
 			? pos + padding
-			: pos - popupDim - padding;
+			: pos - popupDim;
 }
 
-/*
-app.directive('id', function() {
-	return {
-		restrict: 'A',
-		link: function(scope, element, attrs) {
-			switch(attrs['id']) {
-				case 'mouseoverDisplay': 
-					scope.mouseoverDisplay = element[0];
-					break;
-				case 'upload':
-					scope.uploadElement = element[0];
-					break;
-				case 'download':
-					scope.downloadElement = element[0];
-					break;
-			}
-		}
-	};
-});
-*/
+function computeCoord2(pos, popupDim, winDim, padding) {
+	return Math.min(pos + padding, winDim - popupDim);
+}
 
 // pseudo-enums
 
@@ -472,5 +462,3 @@ function insertionIndex(array, item) {
 	}
 	return low;
 }
-
-var PADDING = 8;

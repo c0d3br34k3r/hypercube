@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="UTF-8">
-<html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)">
+<html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)" ng-click="hideTagMenu()">
 
 <head>
 
@@ -29,7 +29,7 @@
 </div>
 
 <table class="view" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
-	<thead >
+	<thead>
 		<tr>
 			<th class="label grand-total">Total: {{totals[color].total}}</th>
 			<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
@@ -39,14 +39,19 @@
 		<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
 			<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
 			<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
-				<div class="card noselect" ng-repeat="card in group track by $index" 
-						ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
-						ng-mouseover="showCard(card, $event)" 
-						ng-mouseout="hideCard()"
-						ng-mousemove="repositionCard($event)"
-						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
-					{{card}}
-					<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div>
+				<div class="card-holder noselect" ng-repeat="card in group track by $index">
+					<div class="edit-holder"><div class="card-edit" ng-show="editing == card">
+						Quantity: <input ng-model="quantities[card]" type="number" min="1" max="99">
+					</div></div>
+					<div class="card" ng-right-click="setEditing($event, card)"
+							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
+							ng-mouseover="showCard(card, $event)" 
+							ng-mouseout="hideCard()"
+							ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)"
+							ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
+						<span class="quantity" ng-show="quantities[card] && quantities[card] != 1">{{quantities[card]}}</span>{{card}}
+						<div class="off-colors"><img class="off-color" height="10" width="10" ng-repeat="color in offColor[card]" ng-src="{{'symbols/' + color + '.svg'}}"></div>
+					</div>
 				</div>
 			</td>
 		</tr>
@@ -55,8 +60,16 @@
 
 <input type="file" id="upload" class="nodisplay" onchange="angular.element(this).scope().readFile(event)">
 <a class="nodisplay" id="download"></a>
-<div ng-class="{hidden: !(card.show && card.hover)}" id="mouseover-display" ng-style="{left:card.left + 'px', top:card.top + 'px'}">{{card.text}}</div>
 
+<div popup="cardText"
+		popup-padding="10"
+		class="cardText"
+		ng-class="{hidden: !(card.show && card.hover)}">{{card.text}}</div>
+
+<div popup="tagMenu"
+		popup-padding="2"
+		class="tagMenu"
+		ng-class="{hidden: !tagMenuOpen}">TAG</div>
 </body>
-	
+
 </html>
