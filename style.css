@@ -47,7 +47,6 @@ table, tbody, tr, td {
 }
 
 .card-holder {
-
 	/* 	
 	padding-bottom: 4px;
 	background-image: linear-gradient(to right, white 50%, #595959 50%);
@@ -55,7 +54,6 @@ table, tbody, tr, td {
 	background-size: 4px 2px;
 	background-repeat: repeat-x;
 	*/
-
 	font-family: Tahoma;
 	font-size: 11px;
     white-space: nowrap;
@@ -68,46 +66,30 @@ table, tbody, tr, td {
 	overflow: hidden;
 }
 
-
 .card-holder:not(:last-child) {
-	/*
-	padding-bottom: 3px;
-	background-image: url(border2.svg);
-	background-position: bottom;
-	background-size: 4px 2px;
-	background-repeat: repeat-x;
-	*/
-	
 	border-bottom: 2px solid #D8D8D8;
-	/* margin-bottom: 1px; */
-}
-
-.edit-holder {
-	position:relative;
-	height: 0;
-	width: 0;
 }
 
 .card-edit {
 	background-color: white;
 	font-family: Tahoma;
-	font-size: 11px;
-	padding: 2px;
+	font-size: 12px;
+	padding: 4px;
     white-space: nowrap;
 	position: absolute;
-	border: 2px solid black;
-	border-radius: 8px 0 8px 8px;
-	width: 200px;
+	width: 20vw;
+	min-width: 200px;
 	height: 100px;
-	right: 0px;
-	top: -2px;
-	z-index: 99;
+	left: 50%;
+	top: 50%;
+	z-index: 98;
+	box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.5);
 }
 
 .quantity {
 	text-align: center;
 	display: inline-block;
-	font-size: 12px;
+	font-size: 11px;
 	font-family: Courier;
 	font-weight: bold;
 	margin-right: 4px;
@@ -124,12 +106,25 @@ input {
 .off-colors {
 	display: inline-block;
 	position: absolute;
+	z-index: 1;
+}
+
+.off-colors-card {
 	top: 1px;
 	right: 1px;
 }
 
+.off-colors-edit {
+	top: 2px;
+	right: 2px;
+}
+
 .off-color {
 	vertical-align: top;
+}
+
+.off-color-edit:not(:last-child) {
+	margin-left: 2px;
 }
 
 .grand-total {
@@ -207,16 +202,8 @@ input {
 	background-color: #595959;
 	color: white;
 	padding: 4px;
-}
-
-.tagMenu {
-	width: 15vw;
-	min-width: 150px;
-	font-family: Tahoma;
-	font-size: 12px;
-	background-color: white;
-	padding: 4px;
-	border: 1px solid black;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+	z-index: 99;
 }
 
 button {

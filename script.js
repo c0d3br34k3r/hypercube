@@ -12,6 +12,8 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		});
 	});
 	
+	$scope.colors = Object.keys(Color);
+	
 	$scope.setEditing = function(e, card) {
 		$scope.editing = card;
 		e.preventDefault();
@@ -28,16 +30,16 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	};
 	
 	$scope.offColor = {
-		'Dauntless River Marshal': ['blue'],
-		'Shrieking Grotesque': ['black'],
-		'Steamcore Weird': ['red'],
-		'Drunau Corpse Trawler': ['black'],
-		'Frilled Oculus': ['green'],
-		'Revenant Patriarch': ['white'],
-		'Crypt Champion': ['red'],
-		'Shoreline Salvager': ['blue'],
-		'Obelisk of Alara': ['white', 'blue', 'black', 'red', 'green'],
-		'Warden of the First Tree': ['white', 'black']
+		'Dauntless River Marshal': 2,
+		'Shrieking Grotesque': 4,
+		'Steamcore Weird': 8,
+		'Drunau Corpse Trawler': 4,
+		'Frilled Oculus': 16,
+		'Revenant Patriarch': 1,
+		'Crypt Champion': 8,
+		'Shoreline Salvager': 2,
+		'Obelisk of Alara': 31,
+		'Warden of the First Tree': 5
 	};
 	
 	$scope.tagColors = {
@@ -45,6 +47,18 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'zombie' : 'darkolivegreen',
 		'evasion' : '#70B04A',
 		'artifact': 'lightsteelblue'
+	}
+	
+	$scope.hasOffColor = function(card, colorIndex) {
+		var mask = 1 << colorIndex;
+		return $scope.offColor[card] && ($scope.offColor[card] & mask);
+	}
+	
+	$scope.toggleOffColor = function(card, colorIndex) {
+		var mask = 1 << colorIndex;
+		if (!($scope.color & mask)) {
+			$scope.offColor[card] = ($scope.offColor[card] | 0) ^ mask;
+		}
 	}
 
 	$scope.getContrasting = function(card) {
@@ -161,6 +175,10 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	var loaded = new Set();
 	
 	$scope.switchOut = function(row, col, index, event) {
+		if ($scope.editing) {
+			$scope.editing = undefined;
+			return;
+		}
 		var card = $scope.colorView()[row][col].splice(index, 1)[0];
 		var destination = event.ctrlKey ? $scope.trash : $scope.cube[1 - $scope.viewIndex][$scope.color][row][col];
 		insertSorted(destination, card);
@@ -186,19 +204,24 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 				rotateBackward();
 				break;
 			case 'j':
+				$scope.editing = false;
 				$scope.color = ($scope.color + 1) & 0x1F;
+				break;
+			case 'Escape':
+				$scope.editing = false;
 				break;
 		}
     };
 	
 	$scope.toggleView = function() {
+		$scope.editing = false;
 		$scope.viewIndex = 1 - $scope.viewIndex;
 	};
 	
-	$scope.colors = Object.keys(Color);
 	$scope.color = 1;
 
 	$scope.toggleColor = function(color, e) {
+		$scope.editing = false;
 		if (!e.shiftKey) {
 			$scope.color = 0;
 		}
@@ -210,10 +233,12 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	};
 	
 	function rotateForward() {
+		$scope.editing = false;
 		$scope.color = ($scope.color << 1) & 0x1F | (($scope.color & 0x10) >> 4);
 	}
 	
 	function rotateBackward() {
+		$scope.editing = false;
 		$scope.color = ($scope.color >> 1) | (($scope.color & 0x1) << 4);
 	}
 	
@@ -347,7 +372,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	}
 	
 	$scope.hideTagMenu = function() {
-		$scope.tagMenuOpen = false;
+		$scope.editing = undefined;
 	}
 	
 }]);
@@ -384,6 +409,20 @@ app.directive('ngRightClick', function($parse) {
     };
 });
 
+app.filter('toArray', function() {
+	return function(input) {
+		var colors = [];
+		if (input) {
+			for (var i = 0; i < 5; i++) {
+				if (input & (1 << i)) {
+					colors.push(COLORS[i]);
+				}
+			}
+		}
+		return colors;
+	};
+})
+
 function computeCoord(pos, popupDim, winDim, padding) {
 	return pos + popupDim + padding <= winDim || pos < winDim / 2
 			? pos + padding
@@ -414,6 +453,8 @@ var Color = {
 	RED: 0x8,
 	GREEN: 0x10
 }
+
+var COLORS = ["WHITE", "BLUE", "BLACK", "RED", "GREEN"];
 
 function utf8ToBase64(str) {
 	return btoa(unescape(encodeURIComponent(str)));
