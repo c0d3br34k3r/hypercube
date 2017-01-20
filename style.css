@@ -62,6 +62,7 @@ table, tbody, tr, td {
 }
 
 .card {
+	box-sizing: border-box;
 	padding: 2px;
 	overflow: hidden;
 }
@@ -79,11 +80,23 @@ table, tbody, tr, td {
 	position: absolute;
 	width: 20vw;
 	min-width: 200px;
-	height: 100px;
 	left: 50%;
 	top: 50%;
 	z-index: 98;
 	box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.5);
+}
+
+.edit-box {
+	display: table;
+}
+
+.edit-row {
+	display: table-row;
+}
+
+.edit-item {
+	text-align: right;
+	display: table-cell;
 }
 
 .quantity {
@@ -114,13 +127,12 @@ input {
 	right: 1px;
 }
 
-.off-colors-edit {
-	top: 2px;
-	right: 2px;
-}
-
 .off-color {
 	vertical-align: top;
+}
+
+.card-title {
+	text-align: center;
 }
 
 .off-color-edit:not(:last-child) {
@@ -192,7 +204,7 @@ input {
 	text-align: center
 }
 
-.cardText {
+.card-text {
 	width: 25vw;
 	min-width: 200px;
 	white-space: pre-wrap;

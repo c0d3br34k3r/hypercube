@@ -137,34 +137,29 @@ function getColorIndicator(card) {
 	return null;
 }
 
-var COLOR_BITS = {
-	White: 1,
-	Blue: 2,
-	Black: 4,
-	Red: 8,
-	Green: 16
-};
+var COLOR_BITS = toBitCodes(['White','Blue','Black','Red','Green']);
 
-var COLOR_CODE_BITS = {
-	W: 1,
-	U: 2,
-	B: 4,
-	R: 8,
-	G: 16
-};
+var COLOR_CODE_BITS = toBitCodes(['W','U','B','R','G']);
 
-var TYPE_BITS = {
-	Tribal: 1,
-	Instant: 2,
-	Sorcery: 4,
-	Enchantment: 8,
-	Artifact: 16,
-	Land: 32,
-	Creature: 64,
-	Planeswalker: 128,
-	Conspiracy: 256
-};
+var TYPE_BITS = toBitCodes([
+	'Tribal',
+	'Instant',
+	'Sorcery',
+	'Enchantment',
+	'Artifact',
+	'Land',
+	'Creature',
+	'Planeswalker',
+	'Conspiracy']);
 
+
+function toBitCodes(keys) {
+	var result = {};
+	for (var i = 0, length = keys.length; i < length; i++;) {
+		result[keys[i]] = 1 << i;
+	}
+	return result;
+}
 
 var COLOR_CODES = {
 	White: 'W',
@@ -172,4 +167,4 @@ var COLOR_CODES = {
 	Black: 'B',
 	Red: 'R',
 	Green: 'G'
-};
+}
