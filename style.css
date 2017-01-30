@@ -1,6 +1,18 @@
+html, body {
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+html {
+	padding: 0;
+	margin: 0;
+}
+
 body {
 	background-color: #EDEDED;
-	margin: 4px;
+	padding: 4px;
+	margin: 0;
 }
 
 .view {
@@ -46,7 +58,15 @@ table, tbody, tr, td {
 	text-align: left;
 }
 
-.card-holder {
+.card {
+	box-sizing: border-box;
+	padding: 2px;
+	overflow: hidden;
+	font-family: Tahoma;
+	font-size: 11px;
+    white-space: nowrap;
+	position: relative;
+	background-color: white;
 	/* 	
 	padding-bottom: 4px;
 	background-image: linear-gradient(to right, white 50%, #595959 50%);
@@ -54,20 +74,9 @@ table, tbody, tr, td {
 	background-size: 4px 2px;
 	background-repeat: repeat-x;
 	*/
-	font-family: Tahoma;
-	font-size: 11px;
-    white-space: nowrap;
-	position: relative;
-	background-color: white;
 }
 
-.card {
-	box-sizing: border-box;
-	padding: 2px;
-	overflow: hidden;
-}
-
-.card-holder:not(:last-child) {
+.card:not(:last-child) {
 	border-bottom: 2px solid #D8D8D8;
 }
 
@@ -80,8 +89,6 @@ table, tbody, tr, td {
 	position: absolute;
 	width: 20vw;
 	min-width: 200px;
-	left: 50%;
-	top: 50%;
 	z-index: 98;
 	box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.5);
 }

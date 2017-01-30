@@ -269,7 +269,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		var reader = new FileReader();
 		var file = event.target.files[0];
 		reader.onload = function(event) {
-			var data = event.target.result
+			var data = event.target.result;
 			switch (file.type) {
 				case 'text/plain':
 					loadView(data.split(/\r?\n/), $scope.viewIndex);
@@ -406,6 +406,29 @@ app.directive('ngRightClick', function($parse) {
 				expr(scope, {$event: e});
 			});
 		}, false);
+	}
+});
+
+app.directive('cardEdit', function($parse) {
+    return function(scope, element, attrs) {
+		element.css('top', '50%');
+		element.css('left', '50%');
+
+		console.log('offset:' + document.body.offsetHeight);
+		console.log('client:' + document.body.clientHeight);
+		console.log('scroll:' + document.body.scrollHeight);
+		
+		var rect = element[0].getBoundingClientRect();
+
+		if (rect.bottom >= document.body.scrollHeight) {
+			element.css('top', '');
+			element.css('bottom', '50%');
+		}
+		
+		if (rect.right >= document.body.scrollWidth) {
+			element.css('left', '');
+			element.css('right', '50%');
+		}
     };
 });
 
