@@ -9,7 +9,7 @@
 		{ "name": "7", "data": [7] },
 		{ "name": "8+", "data": [8, 16] },
 		{ "name": "0", "data": [0] },
-		{ "name": "?", "data": [null] }
+		{ "name": "?", "data": [-1] }
 	],
 	
 	"types": [

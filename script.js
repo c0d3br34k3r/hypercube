@@ -29,18 +29,18 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'Compelling Deterrence': ['zombie']
 	};
 	
-	$scope.offColor = {
-		'Dauntless River Marshal': 2,
-		'Shrieking Grotesque': 4,
-		'Steamcore Weird': 8,
-		'Drunau Corpse Trawler': 4,
-		'Frilled Oculus': 16,
-		'Revenant Patriarch': 1,
-		'Crypt Champion': 8,
-		'Shoreline Salvager': 2,
-		'Obelisk of Alara': 31,
-		'Warden of the First Tree': 5
-	};
+	// $scope.offColor = {
+		// 'Dauntless River Marshal': 2,
+		// 'Shrieking Grotesque': 4,
+		// 'Steamcore Weird': 8,
+		// 'Drunau Corpse Trawler': 4,
+		// 'Frilled Oculus': 16,
+		// 'Revenant Patriarch': 1,
+		// 'Crypt Champion': 8,
+		// 'Shoreline Salvager': 2,
+		// 'Obelisk of Alara': 31,
+		// 'Warden of the First Tree': 5
+	// };
 	
 	$scope.tagColors = {
 		'human' : 'khaki',
@@ -49,17 +49,19 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'artifact': 'lightsteelblue'
 	}
 	
-	$scope.hasOffColor = function(card, colorIndex) {
-		var mask = 1 << colorIndex;
-		return $scope.offColor[card] && ($scope.offColor[card] & mask);
-	}
+	// $scope.hasOffColor = function(card, colorIndex) {
+		// var mask = 1 << colorIndex;
+		
+		// console.log($scope.cubeData[card].offColors);
+		// return $scope.cubeData[card].offColors && ($scope.cubeData[card].offColors & mask);
+	// }
 	
-	$scope.toggleOffColor = function(card, colorIndex) {
-		var mask = 1 << colorIndex;
-		if (!($scope.color & mask)) {
-			$scope.offColor[card] = ($scope.offColor[card] | 0) ^ mask;
-		}
-	}
+	// $scope.toggleOffColor = function(card, colorIndex) {
+		// var mask = 1 << colorIndex;
+		// if (!($scope.color & mask)) {
+			// $scope.offColor[card] = ($scope.offColor[card] | 0) ^ mask;
+		// }
+	// }
 
 	$scope.getContrasting = function(card) {
 		var tags = $scope.tags[card];
@@ -265,14 +267,16 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		document.getElementById('upload').click();
 	};
 	
-	$scope.readFile = function(event) {
+	$scope.readFile = function(e) {
 		var reader = new FileReader();
-		var file = event.target.files[0];
-		reader.onload = function(event) {
-			var data = event.target.result;
+		var file = e.target.files[0];
+		reader.onload = function(e1) {
+			var data = e1.target.result;
 			switch (file.type) {
 				case 'text/plain':
-					loadView(data.split(/\r?\n/), $scope.viewIndex);
+					$scope.$apply(function() {
+						loadView(data.split(/\r?\n/), $scope.viewIndex);
+					});
 					break;
 				case 'application/json':
 					$scope.filename = file.name;
@@ -280,13 +284,14 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 					if (!contents.main || !contents.reserve) {
 						alert('This JSON file is not in valid cube format.');
 					} else {
-						loadJson(contents);
+						$scope.$apply(function() {
+							loadJson(contents);
+						});
 					}
 					break;
 				default:
 					alert('Invalid type: ' + file.type + '.  Must be plain text or JSON.');
 			}
-			$scope.$apply();
 		}
 		reader.readAsText(file, 'UTF-8');
 	};
@@ -299,7 +304,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	function loadView(cards, viewIndex) {
 		var badCards = [];
 		for (var item of cards) {
-			var cardName = Diacritics.remove(item.trim().toLowerCase());
+			var cardName = Diacritics.remove(item.trim()).toLowerCase();
 			if (!cardName || cardName.startsWith('#')) {
 				continue;
 			}
@@ -316,7 +321,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			var manaCostCategory = $scope.manaCostMap.get(card.manaCost);
 			var typeCategory = $scope.typeMap.get(card.types);
 			if (typeCategory != null) {
-				var colors = card.types & Type.LAND ? card.colors2 : card.colors1;
+				var colors = card.types & Type.LAND ? (card.offColors || 0) : card.colors;
 				insertSorted($scope.cube[viewIndex][colors][typeCategory][manaCostCategory], card.name);
 				if (viewIndex == 0) {
 					var totals = $scope.totals[colors];

@@ -21,30 +21,59 @@ var ORIGINAL_PROMOS = new Set([
 	'Sewers of Estark',
 	'Windseeker Centaur']);
 
+var result = {};
+var partial = {};
+var seen = new Set();
+	
 function transform(allSets) {
-	var result = {};
-	var seen = new Set();
 	for (var setCode of Object.keys(allSets)) {
 		var set = allSets[setCode];
 		if (setCode == 'pMEI') {
-			processSet(set, result, seen, function(card) { return ORIGINAL_PROMOS.has(card.name); });
+			processSet(set, function(card) { return ORIGINAL_PROMOS.has(card.name); });
 		} else if (!DISALLOWED_TYPES.has(set.type)
 				&& !DISALLOWED_SETS.has(setCode)
 				&& !setCode.startsWith('DD3_')) {
-			processSet(set, result, seen, function(card) { return true; });
+			processSet(set, function(card) { return true; });
 		}
 	}
 	document.body.innerHTML = JSON.stringify(result);
 }
 
-function processSet(set, map, seen, filter) {
+function processSet(set, filter) {
 	for (card of set.cards) {
 		if (ALLOWED_LAYOUTS.has(card.layout) && filter(card) && !seen.has(card.name)) {
 			seen.add(card.name);
-			var key = removeDiacritics(card.name).toLowerCase();
-			map[key] = getData(card);
-			
+			var key = toKey(card.name);
+			if (card.names) {
+				partial[card.name] = getData(card);
+				checkAllParts(card.names, card.layout);
+			} else {
+				result[key] = getData(card);
+			}
 		}
+	}
+}
+
+function checkAllParts(names, layout) {
+	for (name of names) {
+		if (!partial[name]) {
+			return;
+		}
+	}
+	switch (layout) {
+		case 'split':
+			result[toKey(names.join(' // '))] = merge(partial[names[0]], partial[names[1]], layout);
+			break;
+		case 'double-faced':
+		case 'flip':
+			result[toKey(names[0])] = merge(partial[names[0]], partial[names[1]], layout);
+			break;
+		case 'meld':
+			result[toKey(names[0])] = merge(partial[names[0]], partial[names[2]], layout);
+			result[toKey(names[1])] = merge(partial[names[1]], partial[names[2]], layout);
+			break;
+		default:
+			throw layout;
 	}
 }
 
@@ -104,23 +133,28 @@ function getBits(items, bits) {
 
 function getManaCost(card) {
 	if (!card.manaCost || card.manaCost.includes('X')) {
-		return undefined;
+		return -1;
 	}
 	return card.cmc;
 }
 
-function merge(card1, card2, layout) {
+function merge(data1, data2, layout) {
 	var isSplit = layout == 'split';
-	var colors1 = getColors(card1);
-	var colors2 = getColors(card2);
 	return {
-		name: isSplit ? card1.name + ' // ' + card2.name : card1.name,
-		colors: colors1 | colors1,
-		offColors: colors1 | colors1,
-		types: getTypes(card1.types),
-		manaCost: isSplit ? null : card1.cmc,
-		text: getFullText(card1) + '\n*** ' + layout.toUpperCase() + ' ***\n' + getFullText(card2)
+		name: isSplit ? data1.name + ' // ' + data2.name : data1.name,
+		colors: data1.colors | data2.colors,
+		offColors: mergeOffColors(data1.offColors, data2.offColors),
+		types: data1.types,
+		manaCost: isSplit ? -1 : data1.manaCost,
+		text: data1.text + '\n*** ' + layout.toUpperCase() + ' ***\n' + data2.text
 	};
+}
+
+function mergeOffColors(colors1, colors2) {
+	if (!colors1 && !colors2) {
+		return undefined;
+	}
+	return (colors1 || 0) | (colors2 || 0);
 }
 
 function getFullText(card) {
@@ -163,6 +197,10 @@ function getColorIndicator(card) {
 		}).join('') + ')';
 	}
 	return null;
+}
+
+function toKey(name) {
+	return removeDiacritics(name).toLowerCase();
 }
 
 var COLOR_BITS = toBitCodes(['White','Blue','Black','Red','Green']);

@@ -47,7 +47,7 @@
 						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
 					<span class="quantity" ng-show="quantities[card] && quantities[card] != 1">{{quantities[card]}}</span>{{card}}
 					<div class="off-colors off-colors-card"><img class="off-color" 
-							ng-repeat="color in offColor[card]|toArray" 
+							ng-repeat="color in cubeData[card.toLowerCase()].offColors|toArray" 
 							ng-src="{{'symbols/' + color + '.svg'}}"
 							height="10" width="10">
 					</div>		
@@ -57,7 +57,7 @@
 	</tbody>
 </table>
 
-<input type="file" id="upload" class="nodisplay" onchange="angular.element(this).scope().readFile(event)">
+<input type="file" class="nodisplay" id="upload" onchange="angular.element(this).scope().readFile(event)">
 <a class="nodisplay" id="download"></a>
 
 <div class="card-text" 

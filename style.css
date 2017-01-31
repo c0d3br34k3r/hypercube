@@ -116,13 +116,6 @@ table, tbody, tr, td {
 	max-height: 12px;
 }
 
-input {
-	font-family: Courier;
-	font-size: 12px;
-	font-weight: bold;
-	width: 32px;
-}
-
 .off-colors {
 	display: inline-block;
 	position: absolute;
