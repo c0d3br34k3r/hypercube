@@ -28,19 +28,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'Glint-Nest Crane': ['artifact'],
 		'Compelling Deterrence': ['zombie']
 	};
-	
-	// $scope.offColor = {
-		// 'Dauntless River Marshal': 2,
-		// 'Shrieking Grotesque': 4,
-		// 'Steamcore Weird': 8,
-		// 'Drunau Corpse Trawler': 4,
-		// 'Frilled Oculus': 16,
-		// 'Revenant Patriarch': 1,
-		// 'Crypt Champion': 8,
-		// 'Shoreline Salvager': 2,
-		// 'Obelisk of Alara': 31,
-		// 'Warden of the First Tree': 5
-	// };
+
 	
 	$scope.tagColors = {
 		'human' : 'khaki',
@@ -48,20 +36,6 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		'evasion' : '#70B04A',
 		'artifact': 'lightsteelblue'
 	}
-	
-	// $scope.hasOffColor = function(card, colorIndex) {
-		// var mask = 1 << colorIndex;
-		
-		// console.log($scope.cubeData[card].offColors);
-		// return $scope.cubeData[card].offColors && ($scope.cubeData[card].offColors & mask);
-	// }
-	
-	// $scope.toggleOffColor = function(card, colorIndex) {
-		// var mask = 1 << colorIndex;
-		// if (!($scope.color & mask)) {
-			// $scope.offColor[card] = ($scope.offColor[card] | 0) ^ mask;
-		// }
-	// }
 
 	$scope.getContrasting = function(card) {
 		var tags = $scope.tags[card];
@@ -256,11 +230,11 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	}
 	
 	$scope.listTrash = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64($scope.trash.join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64($scope.trash.map(function(card) { return card.name; }).join('\n')));
 	}
 	
 	$scope.exportView = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(flatten($scope.view()).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(flatten($scope.view()).map(function(card) { return card.name; }).join('\n')));
 	}
 	
 	$scope.upload = function() {
@@ -313,16 +287,16 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 				badCards.push(item.trim());
 				continue;
 			}
-			if (loaded.has(cardName)) {
+			if (loaded.has(card.name)) {
 				continue;
 			}
-			loaded.add(cardName);
+			loaded.add(card.name);
 			
 			var manaCostCategory = $scope.manaCostMap.get(card.manaCost);
 			var typeCategory = $scope.typeMap.get(card.types);
 			if (typeCategory != null) {
 				var colors = card.types & Type.LAND ? (card.offColors || 0) : card.colors;
-				insertSorted($scope.cube[viewIndex][colors][typeCategory][manaCostCategory], card.name);
+				insertSorted($scope.cube[viewIndex][colors][typeCategory][manaCostCategory], card);
 				if (viewIndex == 0) {
 					var totals = $scope.totals[colors];
 					totals.total++;
@@ -346,7 +320,6 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 
 	$scope.showCard = function(card, e) {
 		$scope.card.hover = true;
-		var card = $scope.cubeData[Diacritics.remove(card).toLowerCase()];
 		$scope.card.text = card.text || 'CARD TEXT NOT FOUND';
 	};
 
@@ -512,18 +485,18 @@ function recursiveFlatten(array, copyTo) {
 	}
 }
 
-function insertSorted(array, item) {
-	array.splice(insertionIndex(array, item), 0, item);
+function insertSorted(array, card) {
+	array.splice(insertionIndex(array, card), 0, card);
 }
 
-function insertionIndex(array, item) {
+function insertionIndex(array, card) {
 	var low = 0;
 	var high = array.length - 1;
 	while (low <= high) {
 		var mid = Math.floor((low + high) / 2);
-		if (item > array[mid]) {
+		if (card.name > array[mid].name) {
 			low = mid + 1;
-		} else if (item < array[mid]) {
+		} else if (card.name < array[mid].name) {
 			high = mid - 1;
 		} else {
 			return mid;

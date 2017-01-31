@@ -45,9 +45,9 @@
 						ng-mouseout="hideCard()"
 						ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)"
 						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
-					<span class="quantity" ng-show="quantities[card] && quantities[card] != 1">{{quantities[card]}}</span>{{card}}
+					<span class="quantity" ng-show="quantities[card] && quantities[card] != 1">{{quantities[card.name]}}</span>{{card.name}}
 					<div class="off-colors off-colors-card"><img class="off-color" 
-							ng-repeat="color in cubeData[card.toLowerCase()].offColors|toArray" 
+							ng-repeat="color in card.offColors|toArray" 
 							ng-src="{{'symbols/' + color + '.svg'}}"
 							height="10" width="10">
 					</div>		
