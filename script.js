@@ -1,6 +1,6 @@
 var app = angular.module('app', []);
 
-app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $http, $window) {
 
 	$http.get('./cube-data.json', {responseType: 'json'}).then(function(result) {
 		$scope.cubeData = result.data;
@@ -11,53 +11,11 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			});
 		});
 	});
-	
-	$scope.colors = Object.keys(Color);
-	
-	$scope.setEditing = function(e, card) {
-		$scope.editing = card;
-		e.preventDefault();
-	}
 
-	$scope.tags = {
-		'Courageous Outrider': ['human'],
-		'Riders of Gavony': ['human', 'evasion'],
-		'Drunau Corpse Trawler': ['zombie'],
-		'Crypt Champion': ['zombie'],
-		'Padeem, Consul of Innovation': ['artifact'],
-		'Glint-Nest Crane': ['artifact'],
-		'Compelling Deterrence': ['zombie']
-	};
-
-	
-	$scope.tagColors = {
-		'human' : 'khaki',
-		'zombie' : 'darkolivegreen',
-		'evasion' : '#70B04A',
-		'artifact': 'lightsteelblue'
-	}
-
-	$scope.getContrasting = function(card) {
-		var tags = $scope.tags[card];
-		if (tags) {
-			return getContrasting($scope.tagColors[$scope.tags[card][0]]);
-		}
-		return undefined;
-	};
-	
-	$scope.rowNonempty = function(row) {
-		for (group of row) {
-			if (group.length) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	$scope.quantities = {};
-	
 	$scope.viewIndex = 0;
-	$scope.cube = [];
+		
+	$scope.color = 1;
+
 	$scope.trash = [];
 	
 	$scope.columnLabels = [];
@@ -65,23 +23,36 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	
 	$scope.filename = 'new cube.json';
 	
-	$scope.view = function() {
-		return $scope.cube[$scope.viewIndex];
-	};
+	$scope.loaded = new Set();
 	
-	$scope.colorView = function() {
-		return $scope.cube[$scope.viewIndex][$scope.color];
-	};
-
+	$scope.tags = {};
+	$scope.quantities = {};
+	
+	$scope.colors = Object.keys(Color);
+	
 	function setup(categories) {
 		$scope.typeMap = createTypeMap(categories.types);
 		$scope.manaCostMap = createManaCostMap(categories.manaCosts);
 		
 		var rows = categories.types.length;
 		var cols = categories.manaCosts.length;
-		$scope.totals = createTotals(rows, cols);
-		$scope.cube = newMultidimensionalArray([2, 32, rows, cols], function() {
-			return [];
+		
+		$scope.totals = replicate(32, function() {
+			return {
+				total: 0,
+				rowTotals: newFilledArray(rows, 0),
+				colTotals: newFilledArray(cols, 0),
+			};
+		});
+		
+		$scope.cube = replicate(2, function() {
+			return replicate(32, function() {
+				return replicate(rows, function() {
+					return replicate(cols, function() {
+						return [];
+					});
+				});
+			});
 		});
 	}
 
@@ -101,8 +72,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		var manaCostMap = new Map();
 		for (var i = 0, len = manaCosts.length; i < len; i++) {
 			var manaCostGroup = manaCosts[i];
-			for (var value = manaCostGroup.data[0], 
-					limit = manaCostGroup.data[1] || manaCostGroup.data[0]; value <= limit; value++) {
+			for (var value = manaCostGroup.data[0], limit = manaCostGroup.data[1] || manaCostGroup.data[0]; value <= limit; value++) {
 				manaCostMap.set(value, i);
 			}
 			$scope.columnLabels[i] = manaCostGroup.name;
@@ -110,52 +80,8 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		return manaCostMap;
 	}
 	
-	function createTotals(rows, cols) {
-		var totals = new Array(32);
-		for (var colorCode = 0; colorCode < 32; colorCode++) {
-			totals[colorCode] = {
-				total: 0,
-				rowTotals: newFilledArray(rows, 0),
-				colTotals: newFilledArray(cols, 0)
-			};
-		}
-		return totals;
-	}
-
-	function newFilledArray(length, value) {
-		var array = new Array(length);
-		array.fill(value);
-		return array;
-	}
-	
-	function newMultidimensionalArray(lengths, bottomValue) {
-		if (!lengths.length) {
-			return bottomValue();
-		}
-		var array = new Array(lengths[0]);
-		var newLengths = lengths.slice(1, lengths.length);
-		for (var i = 0; i < lengths[0]; i++) {
-			array[i] = newMultidimensionalArray(newLengths, bottomValue);
-		}
-		return array;
-	}
-	
-	// Used for category processing?
-	$scope.range = function(start, end) {
-		var result = [];
-		for (var i = start; i <= end; i++) {
-			result.push(i);
-		}
-	}
-
-	var loaded = new Set();
-	
 	$scope.switchOut = function(row, col, index, event) {
-		if ($scope.editing) {
-			$scope.editing = undefined;
-			return;
-		}
-		var card = $scope.colorView()[row][col].splice(index, 1)[0];
+		var card = $scope.cube[$scope.viewIndex][$scope.color][row][col].splice(index, 1)[0];
 		var destination = event.ctrlKey ? $scope.trash : $scope.cube[1 - $scope.viewIndex][$scope.color][row][col];
 		insertSorted(destination, card);
 		var increment = ($scope.viewIndex == 0) ? -1 : (event.ctrlKey ? 0 : 1);
@@ -164,7 +90,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		totals.colTotals[col] += increment;
 		totals.rowTotals[row] += increment;
 		if (event.ctrlKey) {
-			loaded.delete(card);
+			$scope.loaded.delete(card);
 		}
 	}
 	
@@ -180,24 +106,17 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 				rotateBackward();
 				break;
 			case 'j':
-				$scope.editing = false;
 				$scope.color = ($scope.color + 1) & 0x1F;
 				break;
-			case 'Escape':
-				$scope.editing = false;
-				break;
+			default:
 		}
     };
 	
 	$scope.toggleView = function() {
-		$scope.editing = false;
 		$scope.viewIndex = 1 - $scope.viewIndex;
 	};
-	
-	$scope.color = 1;
 
 	$scope.toggleColor = function(color, e) {
-		$scope.editing = false;
 		if (!e.shiftKey) {
 			$scope.color = 0;
 		}
@@ -209,12 +128,10 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 	};
 	
 	function rotateForward() {
-		$scope.editing = false;
 		$scope.color = ($scope.color << 1) & 0x1F | (($scope.color & 0x10) >> 4);
 	}
 	
 	function rotateBackward() {
-		$scope.editing = false;
 		$scope.color = ($scope.color >> 1) | (($scope.color & 0x1) << 4);
 	}
 	
@@ -255,7 +172,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 				case 'application/json':
 					$scope.filename = file.name;
 					var contents = JSON.parse(data);
-					if (!contents.main || !contents.reserve) {
+					if (!(contents.main && contents.reserve)) {
 						alert('This JSON file is not in valid cube format.');
 					} else {
 						$scope.$apply(function() {
@@ -287,10 +204,10 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 				badCards.push(item.trim());
 				continue;
 			}
-			if (loaded.has(card.name)) {
+			if ($scope.loaded.has(card.name)) {
 				continue;
 			}
-			loaded.add(card.name);
+			$scope.loaded.add(card.name);
 			
 			var manaCostCategory = $scope.manaCostMap.get(card.manaCost);
 			var typeCategory = $scope.typeMap.get(card.types);
@@ -310,6 +227,23 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 		}
 	}
 	
+	$scope.getContrasting = function(card) {
+		var tags = $scope.tags[card];
+		if (tags) {
+			return getContrasting($scope.tagColors[$scope.tags[card][0]]);
+		}
+		return undefined;
+	};
+	
+	$scope.rowNonempty = function(row) {
+		for (group of row) {
+			if (group.length) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	// MOUSEOVER CARD TEXT
 
 	$scope.card = {
@@ -320,7 +254,7 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 
 	$scope.showCard = function(card, e) {
 		$scope.card.hover = true;
-		$scope.card.text = card.text || 'CARD TEXT NOT FOUND';
+		$scope.card.text = card.text;
 	};
 
 	$scope.hideCard = function() {
@@ -338,21 +272,11 @@ app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
 			$scope.card.show = false;
 		}
 	}
-	
-	// TAG MENU
-	
-	$scope.tagMenuOpen = false;
-	
-	$scope.showTagMenu = function(e) {
-		$scope.tagMenuOpen = true;
-		$scope.tagMenu.setPosition(e.clientX, e.clientY);
-		e.preventDefault();
-	}
-	
-	$scope.hideTagMenu = function() {
-		$scope.editing = undefined;
-	}
-	
+
+	angular.element($window).bind('blur', function (){
+		$scope.card.show = false;
+	});
+
 }]);
 
 app.directive('popup', function($parse) {
@@ -444,7 +368,8 @@ var Type = {
 	ARTIFACT: 0x10,
 	LAND: 0x20,
 	CREATURE: 0x40,
-	PLANESWALKER: 0x80
+	PLANESWALKER: 0x80,
+	CONSPIRACY: 0x100
 };
 
 var Color = {
@@ -453,9 +378,23 @@ var Color = {
 	BLACK: 0x4,
 	RED: 0x8,
 	GREEN: 0x10
-}
+};
 
 var COLORS = ["WHITE", "BLUE", "BLACK", "RED", "GREEN"];
+
+function replicate(count, supplier) {
+	var result = new Array(count);
+	for (var i = 0; i < count; i++) {
+		result[i] = supplier();
+	}
+	return result;
+}
+
+function newFilledArray(length, value) {
+	var array = new Array(length);
+	array.fill(value);
+	return array;
+}
 
 function utf8ToBase64(str) {
 	return btoa(unescape(encodeURIComponent(str)));

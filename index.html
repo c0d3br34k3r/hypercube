@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="UTF-8">
-<html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)" ng-click="hideTagMenu()">
+<html ng-app="app" ng-controller="Controller" ng-keypress="shortcut($event)" ng-keydown="keydown($event)" ng-keyup="keyup($event)">
 
 <head>
 
@@ -45,8 +45,8 @@
 						ng-mouseout="hideCard()"
 						ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)"
 						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
-					<span class="quantity" ng-show="quantities[card] && quantities[card] != 1">{{quantities[card.name]}}</span>{{card.name}}
-					<div class="off-colors off-colors-card"><img class="off-color" 
+					<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>{{card.name}}
+					<div class="off-colors"><img class="off-color" 
 							ng-repeat="color in card.offColors|toArray" 
 							ng-src="{{'symbols/' + color + '.svg'}}"
 							height="10" width="10">

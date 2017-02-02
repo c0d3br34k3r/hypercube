@@ -19,6 +19,6 @@
 		{ "name": "Artifact", "data": ["artifact", "enchantment artifact", "tribal artifact"] },
 		{ "name": "Enchantment", "data": ["enchantment", "tribal enchantment"] },
 		{ "name": "Planeswalker", "data": ["planeswalker"] },
-		{ "name": "Land", "data": ["land", "artifact land"] }
+		{ "name": "Land", "data": ["land", "artifact land", "land creature"] }
 	]
 }
