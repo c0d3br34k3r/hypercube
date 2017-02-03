@@ -1,9 +1,40 @@
-html, body {
-	
+html {
+
 }
 
 body {
 	background-color: #EDEDED;
+}
+
+/* TABS */
+
+.tabs {
+	display: flex;
+	width: 250px;
+	border: 2px solid black;
+	border-radius: 6px;
+	padding: 2px;
+}
+
+.tab {
+	font-family: Tahoma;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	flex: 1;
+	text-align: center;
+}
+
+.tab:first-child {
+	border-radius: 3px 0 0 3px;
+}
+
+.tab:last-child {
+	border-radius: 0 3px 3px 0;
+}
+
+.tab:not(:last-child) {
+	border-right: 2px solid black;
 }
 
 /* MENU */
@@ -166,19 +197,27 @@ table, tbody, tr, td {
 
 /* GENERAL */
 
-button {
+.menu-button {
 	border: 2px outset;
 	border-radius: 0;
 	font-family: Courier;
 	font-size: 12px;
 }
 
-button:active {
+.menu-button:active {
 	border: 2px inset;
 }
 
 button::-moz-focus-inner {
 	border: 0;
+}
+
+/* SETTINGS */
+
+input[type=checkbox] {
+	font-family: Tahoma;
+	font-size: 14px;
+	background-color: red; /* ??? */
 }
 
 .nodisplay {

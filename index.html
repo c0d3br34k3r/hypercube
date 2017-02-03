@@ -17,54 +17,73 @@
 </head>
 
 <body>
+<div class="tabs"><span class="tab" ng-repeat="tab in ::TAB_NAMES" 
+		ng-click="setTab($index)"
+		ng-style="{'background-color': tabIndex == $index ? 'black' : 'white', 'color': tabIndex == $index ? 'white' : 'black'}">{{tab}}</div>
 
-<div class="menu">
-	<span class="menu-item menu-left"></span>
-	<span class="menu-item menu-center"><img ng-repeat="colorItem in ::colors"
-			ng-click="toggleColor(colorItem, $event)"
-			ng-src="{{(colorSelected(colorItem) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
-			class="colorSelector"
-			height="40" width="40"></span>
-	<span class="menu-item menu-right"><span class="view-indicator noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button ng-click="upload()">Load</button><button ng-click="saveProgress()">Save</button><button ng-click="listTrash()">Trash</button><button ng-click="exportView()">Export</button></span>
+<div ng-switch="tabIndex">
+	<div ng-switch-when="0">
+
+	<div class="menu">
+		<span class="menu-item menu-left"></span>
+		<span class="menu-item menu-center"><img ng-repeat="colorItem in ::COLORS"
+				ng-click="toggleColor($index, $event)"
+				ng-src="{{(colorSelected($index) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
+				class="colorSelector"
+				height="40" width="40"></span>
+		<span class="menu-item menu-right"><span class="view-indicator noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button class="menu-button" ng-click="upload()">Load</button><button class="menu-button" ng-click="saveProgress()">Save</button><button class="menu-button" ng-click="listTrash()">Trash</button><button class="menu-button" ng-click="exportView()">Export</button></span>
+	</div>
+
+	<table class="view" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
+		<thead>
+			<tr>
+				<th class="label grand-total">Total: {{totals[color].total}}</th>
+				<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
+				<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
+				<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
+					<div class="card noselect" ng-repeat="card in group track by $index"
+							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
+							ng-mouseover="showCard(card, $event)"
+							ng-mouseout="hideCard()"
+							ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)"
+							ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
+						<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>{{card.name}}
+						<div ng-if="settings.showOffColors" class="off-colors"><img class="off-color" 
+								ng-repeat="color in card.offColors|toArray" 
+								ng-src="{{'symbols/' + color + '.svg'}}"
+								height="10" width="10">
+						</div>		
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<input type="file" class="nodisplay" id="upload" onchange="angular.element(this).scope().readFile(event)">
+	<a class="nodisplay" id="download"></a>
+
+	<div class="card-text" 
+			popup="cardText"
+			popup-padding="10"
+			ng-class="{hidden: !(card.show && card.hover)}">{{card.text}}</div>
+
+	</div>
+	<div ng-switch-when="1">
+		SEARCH
+	</div>
+	<div ng-switch-when="2">
+		TAGS
+	</div>
+	<div ng-switch-when="3">
+		SETTINGS<br>
+		<input type="checkbox" ng-model="settings.showOffColors">Show off-colors</input>
+	</div>
 </div>
-
-<table class="view" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
-	<thead>
-		<tr>
-			<th class="label grand-total">Total: {{totals[color].total}}</th>
-			<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
-			<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
-			<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
-				<div class="card noselect" ng-repeat="card in group track by $index"
-						ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
-						ng-mouseover="showCard(card, $event)"
-						ng-mouseout="hideCard()"
-						ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)"
-						ng-style="{'background-color': tags[card] ? tagColors[tags[card][0]] : 'white', 'color': getContrasting(card)}">
-					<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>{{card.name}}
-					<div class="off-colors"><img class="off-color" 
-							ng-repeat="color in card.offColors|toArray" 
-							ng-src="{{'symbols/' + color + '.svg'}}"
-							height="10" width="10">
-					</div>		
-				</div>
-			</td>
-		</tr>
-	</tbody>
-</table>
-
-<input type="file" class="nodisplay" id="upload" onchange="angular.element(this).scope().readFile(event)">
-<a class="nodisplay" id="download"></a>
-
-<div class="card-text" 
-		popup="cardText"
-		popup-padding="10"
-		ng-class="{hidden: !(card.show && card.hover)}">{{card.text}}</div>
-
+		
 </body>
 
 </html>

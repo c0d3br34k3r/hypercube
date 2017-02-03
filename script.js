@@ -12,6 +12,8 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		});
 	});
 
+	$scope.tabIndex = 0;
+	
 	$scope.viewIndex = 0;
 		
 	$scope.color = 1;
@@ -28,8 +30,21 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	$scope.tags = {};
 	$scope.quantities = {};
 	
-	$scope.colors = Object.keys(Color);
+	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
+	$scope.TAB_NAMES = ['Cards', 'Search', 'Tags', 'Settings'];
 	
+	$scope.settings = {
+		showOffColors: true
+	}
+	
+	$scope.setTab = function(index) {
+		$scope.tabIndex = index;
+	}
+	
+	$scope.test = function() {
+		$scope.showOffColors = !$scope.showOffColors;
+	}
+
 	function setup(categories) {
 		$scope.typeMap = createTypeMap(categories.types);
 		$scope.manaCostMap = createManaCostMap(categories.manaCosts);
@@ -116,15 +131,15 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		$scope.viewIndex = 1 - $scope.viewIndex;
 	};
 
-	$scope.toggleColor = function(color, e) {
+	$scope.toggleColor = function(colorIndex, e) {
 		if (!e.shiftKey) {
 			$scope.color = 0;
 		}
-		$scope.color ^= Color[color];
+		$scope.color ^= 1 << colorIndex;
 	};
 	
-	$scope.colorSelected = function(color) {
-		return Boolean($scope.color & Color[color]);
+	$scope.colorSelected = function(colorIndex) {
+		return $scope.color & (1 << colorIndex);
 	};
 	
 	function rotateForward() {
@@ -137,8 +152,8 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	
 	$scope.saveProgress = function() {
 		var contents = {
-			main: flatten($scope.cube[0]),
-			reserve: flatten($scope.cube[1])
+			main: toCardNames(flatten($scope.cube[0])),
+			reserve: toCardNames(flatten($scope.cube[1]))
 		};
 		var download = document.getElementById('download');
 		download.download = $scope.filename;
@@ -147,17 +162,23 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	}
 	
 	$scope.listTrash = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64($scope.trash.map(function(card) { return card.name; }).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames($scope.trash).join('\n')));
 	}
 	
 	$scope.exportView = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(flatten($scope.view()).map(function(card) { return card.name; }).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')));
+	}
+	
+	function toCardNames(area) {
+		return area.map(function(card) {
+			return card.name;
+		});
 	}
 	
 	$scope.upload = function() {
 		document.getElementById('upload').click();
 	};
-	
+
 	$scope.readFile = function(e) {
 		var reader = new FileReader();
 		var file = e.target.files[0];
@@ -311,29 +332,6 @@ app.directive('ngRightClick', function($parse) {
 	}
 });
 
-app.directive('cardEdit', function($parse) {
-    return function(scope, element, attrs) {
-		element.css('top', '50%');
-		element.css('left', '50%');
-
-		console.log('offset:' + document.body.offsetHeight);
-		console.log('client:' + document.body.clientHeight);
-		console.log('scroll:' + document.body.scrollHeight);
-		
-		var rect = element[0].getBoundingClientRect();
-
-		if (rect.bottom >= document.body.scrollHeight) {
-			element.css('top', '');
-			element.css('bottom', '50%');
-		}
-		
-		if (rect.right >= document.body.scrollWidth) {
-			element.css('left', '');
-			element.css('right', '50%');
-		}
-    };
-});
-
 app.filter('toArray', function() {
 	return function(input) {
 		var colors = [];
@@ -443,3 +441,22 @@ function insertionIndex(array, card) {
 	}
 	return low;
 }
+
+function powerSet(items) {
+	var result = [];
+	for (var i = 0, combinations = 1 << items.length; i < combinations; i++) {
+		var subset = [];
+		for (var j = 0, len = items.length; j < len; j++) {
+			if (i & (1 << j)) {
+				subset.push(items[j]);
+			}
+		}
+		result.push(subset);
+	}
+	return result;
+}
+
+console.log(powerSet(['Enchantment', 'Artifact']).map(function(subset) {
+	subset.push('Creature');
+	return subset.join(' ');
+}));
