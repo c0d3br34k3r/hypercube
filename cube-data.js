@@ -36,7 +36,9 @@ function transform(allSets) {
 			processSet(set, function(card) { return true; });
 		}
 	}
-	document.body.innerHTML = JSON.stringify(result);
+	document.body.innerHTML = 
+		// Object.values(result).map(function(card) { return card.name; }).join('<br>');
+		JSON.stringify(result);
 }
 
 function processSet(set, filter) {

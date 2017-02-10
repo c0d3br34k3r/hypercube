@@ -6,13 +6,30 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		$scope.cubeData = result.data;
 		$http.get('./categories.json', {responseType: 'json'}).then(function(result) {
 			setup(result.data);
-			$http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
-				loadJson(result.data);
-			});
+			// $http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
+				// loadJson(result.data);
+			// });
 		});
 	});
+	
+	$scope.colorPicker = [0,0,0];
+	
+	$scope.hexColor = function() {
+		return '#' + $scope.colorPicker.map(function(item) {
+			return zeroPad(Number(item).toString(16));
+		}).join('');
+	}
+	
+	function zeroPad(number, width) {
+		width = width || 2;
+		return '0'.repeat(Math.max(width - number.length, 0)) + number;
+	}
+	
+	$scope.test = function() {
+		return (200).toString(16);
+	};
 
-	$scope.tabIndex = 0;
+	$scope.tabIndex = 2;
 	
 	$scope.viewIndex = 0;
 		
@@ -27,11 +44,20 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	
 	$scope.loaded = new Set();
 	
-	$scope.tags = {};
 	$scope.quantities = {};
 	
 	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
 	$scope.TAB_NAMES = ['Cards', 'Search', 'Tags', 'Settings'];
+	
+	$scope.tags = {
+		'Zombie' : 'black',
+		'Human' : 'green',
+		'Artifact' : 'steelblue'
+	};
+	
+	$scope.tagNames = function() {
+		return Object.keys($scope.tags);
+	};
 	
 	$scope.settings = {
 		showOffColors: true
@@ -248,13 +274,14 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		}
 	}
 	
-	$scope.getContrasting = function(card) {
-		var tags = $scope.tags[card];
-		if (tags) {
-			return getContrasting($scope.tagColors[$scope.tags[card][0]]);
-		}
-		return undefined;
+	$scope.contrastingColor = function(color) {
+		return contrastingColor(color);
 	};
+
+	$scope.contrastingColorForTag = function(tag) {
+		return contrastingColor($scope.tags[tag]);
+	};
+	
 	
 	$scope.rowNonempty = function(row) {
 		for (group of row) {
@@ -264,6 +291,12 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		}
 		return false;
 	}
+	
+	// TAGS
+	
+	$scope.removeTag = function(index) {
+		
+	};
 	
 	// MOUSEOVER CARD TEXT
 
@@ -455,8 +488,3 @@ function powerSet(items) {
 	}
 	return result;
 }
-
-console.log(powerSet(['Enchantment', 'Artifact']).map(function(subset) {
-	subset.push('Creature');
-	return subset.join(' ');
-}));

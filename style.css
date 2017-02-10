@@ -2,6 +2,11 @@ html {
 
 }
 
+*{
+	font-family: Tahoma;
+	font-size: 12px;
+}
+
 body {
 	background-color: #EDEDED;
 }
@@ -13,11 +18,11 @@ body {
 	width: 250px;
 	border: 2px solid black;
 	border-radius: 6px;
+	background-color: white;
 	padding: 2px;
 }
 
 .tab {
-	font-family: Tahoma;
 	font-size: 12px;
 	font-weight: bold;
 	cursor: pointer;
@@ -85,12 +90,6 @@ body {
 	background-color: black;
 }
 
-/*
-table, tbody, tr, td {
-	overflow: visible;
-}
-*/
-
 .view-main {
 	background-color: #664400;
 }
@@ -107,7 +106,6 @@ table, tbody, tr, td {
 
 .label {
 	color: white;
-	font-family: Tahoma;
 	font-size: 12px;
 	vertical-align: middle;
 	padding: 2px;
@@ -147,7 +145,6 @@ table, tbody, tr, td {
 	box-sizing: border-box;
 	padding: 2px;
 	overflow: hidden;
-	font-family: Tahoma;
 	font-size: 11px;
     white-space: nowrap;
 	position: relative;
@@ -185,7 +182,6 @@ table, tbody, tr, td {
 	width: 25vw;
 	min-width: 200px;
 	white-space: pre-wrap;
-	font-family: Tahoma;
 	font-size: 12px;
 	border-radius: 6px;
 	background-color: #595959;
@@ -212,13 +208,57 @@ button::-moz-focus-inner {
 	border: 0;
 }
 
-/* SETTINGS */
+/* TAGS */
 
-input[type=checkbox] {
-	font-family: Tahoma;
-	font-size: 14px;
-	background-color: red; /* ??? */
+.tag-view {
+	margin-top: 12px;
+	display: flex;
 }
+
+.tag-column {
+
+}
+
+.left {
+	flex: 1;
+}
+
+.right {
+	flex: 3;
+}
+
+.tag-column:not(:last-child) {
+	margin-right: 16px;
+}
+
+.tag-entry {
+	display: flex;
+	align-items: center;
+}
+
+.tag-name {
+	padding: 4px;
+	font-size: 14px;
+	flex: 1;
+}
+
+.tag-color {
+	padding: 4px;
+	font-size: 14px;
+	flex: 1;
+}
+
+.tag-close {
+	padding: 4px;
+	cursor: default;
+}
+
+
+img,svg {
+	display: inline-block;
+}
+
+/* SETTINGS */
 
 .nodisplay {
 	display: none;
@@ -234,4 +274,9 @@ input[type=checkbox] {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+}
+
+.test {
+	box-sizing: border-box;
+	border: 1px dotted black;
 }
