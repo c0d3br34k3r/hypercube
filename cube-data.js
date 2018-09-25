@@ -1,32 +1,12 @@
-var request = new XMLHttpRequest();
-request.onreadystatechange = function() {
-    if (request.readyState == 4 && request.status == 200) {
-		transform(JSON.parse(request.responseText));
-    }
-};
+var allSets;
 
-request.overrideMimeType('application/json');
-request.open('GET', './AllSets.json', true);
-request.send();
+function mtgjsoncallback(mtgjson) {
+	allSets = mtgjson;
+}
 
-var DISALLOWED_TYPES = new Set(['promo', 'un', 'vanguard']);
-var DISALLOWED_SETS = new Set(['ITP', 'RQS', 'CST', 'CEI', 'CPK', 'CED', 'MGB', 'FRF_UGIN', 'PCA']);
-var ALLOWED_LAYOUTS = new Set(['normal', 'split', 'flip', 'double-faced', 'leveler', 'meld']);
-
-var ORIGINAL_PROMOS = new Set([
-	'Arena',
-	'Giant Badger',
-	'Mana Crypt',
-	'Nalathni Dragon',
-	'Sewers of Estark',
-	'Windseeker Centaur']);
-
-var result = {};
-var partial = {};
-var seen = new Set();
-	
-function transform(allSets) {
+window.onload = function() {
 	for (var setCode of Object.keys(allSets)) {
+		console.log('processing... ' + setCode);
 		var set = allSets[setCode];
 		if (setCode == 'pMEI') {
 			processSet(set, function(card) { return ORIGINAL_PROMOS.has(card.name); });
@@ -39,14 +19,30 @@ function transform(allSets) {
 	document.body.innerHTML = 
 		// Object.values(result).map(function(card) { return card.name; }).join('<br>');
 		JSON.stringify(result);
-}
+};
+
+var DISALLOWED_TYPES = new Set(['promo', 'un', 'vanguard']);
+var DISALLOWED_SETS = new Set(['ITP', 'RQS', 'CST', 'CEI', 'CPK', 'CED', 'MGB', 'FRF_UGIN', 'PCA', 'ATH']);
+var ALLOWED_LAYOUTS = new Set(['normal', 'split', 'flip', 'double-faced', 'leveler', 'meld', 'aftermath']);
+
+var ORIGINAL_PROMOS = new Set([
+	'Arena',
+	'Giant Badger',
+	'Mana Crypt',
+	'Nalathni Dragon',
+	'Sewers of Estark',
+	'Windseeker Centaur']);
+
+var result = {};
+var partial = {};
+var seen = new Set();
 
 function processSet(set, filter) {
 	for (card of set.cards) {
 		if (ALLOWED_LAYOUTS.has(card.layout) && filter(card) && !seen.has(card.name)) {
 			seen.add(card.name);
 			var key = toKey(card.name);
-			if (card.names) {
+			if (card.names && card.layout != 'normal') {
 				partial[card.name] = getData(card);
 				checkAllParts(card.names, card.layout);
 			} else {
@@ -64,6 +60,7 @@ function checkAllParts(names, layout) {
 	}
 	switch (layout) {
 		case 'split':
+		case 'aftermath':
 			result[toKey(names.join(' // '))] = merge(partial[names[0]], partial[names[1]], layout);
 			break;
 		case 'double-faced':
@@ -71,8 +68,8 @@ function checkAllParts(names, layout) {
 			result[toKey(names[0])] = merge(partial[names[0]], partial[names[1]], layout);
 			break;
 		case 'meld':
-			result[toKey(names[0])] = merge(partial[names[0]], partial[names[2]], layout);
-			result[toKey(names[1])] = merge(partial[names[1]], partial[names[2]], layout);
+			result[toKey(names[0])] = merge(partial[names[0]], partial[names[1]], layout);
+			result[toKey(names[1])] = merge(partial[names[0]], partial[names[1]], layout);
 			break;
 		default:
 			throw layout;
@@ -141,7 +138,7 @@ function getManaCost(card) {
 }
 
 function merge(data1, data2, layout) {
-	var isSplit = layout == 'split';
+	var isSplit = (layout == 'split' || layout == 'aftermath');
 	return {
 		name: isSplit ? data1.name + ' // ' + data2.name : data1.name,
 		colors: data1.colors | data2.colors,

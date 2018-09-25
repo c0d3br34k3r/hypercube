@@ -11,65 +11,28 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 			// });
 		});
 	});
-	
-	$scope.colorPicker = [0,0,0];
-	
-	$scope.hexColor = function() {
-		return '#' + $scope.colorPicker.map(function(item) {
-			return zeroPad(Number(item).toString(16));
-		}).join('');
-	}
-	
-	function zeroPad(number, width) {
-		width = width || 2;
-		return '0'.repeat(Math.max(width - number.length, 0)) + number;
-	}
-	
-	$scope.test = function() {
-		return (200).toString(16);
-	};
 
-	$scope.tabIndex = 2;
-	
+	$scope.tabIndex = 0;
 	$scope.viewIndex = 0;
-		
 	$scope.color = 1;
-
+	$scope.total = 0;
 	$scope.trash = [];
-	
 	$scope.columnLabels = [];
 	$scope.rowLabels = [];
-	
 	$scope.filename = 'new cube.json';
-	
 	$scope.loaded = new Set();
-	
 	$scope.quantities = {};
-	
 	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
-	$scope.TAB_NAMES = ['Cards', 'Search', 'Tags', 'Settings'];
-	
-	$scope.tags = {
-		'Zombie' : 'black',
-		'Human' : 'green',
-		'Artifact' : 'steelblue'
-	};
-	
-	$scope.tagNames = function() {
-		return Object.keys($scope.tags);
-	};
-	
-	$scope.settings = {
-		showOffColors: true
-	}
+	$scope.TAB_NAMES = ['Cards', 'Lands', 'Junk', 'Settings', 'Files'];
+	$scope.settings = { showOffColors: true };
 	
 	$scope.setTab = function(index) {
 		$scope.tabIndex = index;
-	}
+	};
 	
 	$scope.test = function() {
 		$scope.showOffColors = !$scope.showOffColors;
-	}
+	};
 
 	function setup(categories) {
 		$scope.typeMap = createTypeMap(categories.types);
@@ -126,6 +89,7 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		var destination = event.ctrlKey ? $scope.trash : $scope.cube[1 - $scope.viewIndex][$scope.color][row][col];
 		insertSorted(destination, card);
 		var increment = ($scope.viewIndex == 0) ? -1 : (event.ctrlKey ? 0 : 1);
+		$scope.total += increment;
 		var totals = $scope.totals[$scope.color];
 		totals.total += increment;
 		totals.colTotals[col] += increment;
@@ -186,11 +150,11 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		download.href = 'data:application/json;charset=utf-8;base64,' + utf8ToBase64(JSON.stringify(contents));
 		download.click();
 	}
-	
+
 	$scope.listTrash = function() {
 		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames($scope.trash).join('\n')));
 	}
-	
+
 	$scope.exportView = function() {
 		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')));
 	}
@@ -228,11 +192,14 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 					}
 					break;
 				default:
-					alert('Invalid type: ' + file.type + '.  Must be plain text or JSON.');
+					alert('Invalid type: ' + (file.type || file.name) + '.  Must be plain text or JSON.');
 			}
 		}
 		reader.readAsText(file, 'UTF-8');
 	};
+	
+	function getFileType() {
+	}
 	
 	function loadJson(contents) {
 		loadView(contents.main, 0);
@@ -264,6 +231,7 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 				if (viewIndex == 0) {
 					var totals = $scope.totals[colors];
 					totals.total++;
+					$scope.total++;
 					totals.rowTotals[typeCategory]++;
 					totals.colTotals[manaCostCategory]++;
 				}
@@ -273,16 +241,7 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 			alert('Bad cards: ' + badCards.join(', '));
 		}
 	}
-	
-	$scope.contrastingColor = function(color) {
-		return contrastingColor(color);
-	};
 
-	$scope.contrastingColorForTag = function(tag) {
-		return contrastingColor($scope.tags[tag]);
-	};
-	
-	
 	$scope.rowNonempty = function(row) {
 		for (group of row) {
 			if (group.length) {
@@ -330,6 +289,16 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	angular.element($window).bind('blur', function (){
 		$scope.card.show = false;
 	});
+	
+	// COLORS
+	
+	$scope.contrastingColor = function(color) {
+		return contrastingColor(color);
+	};
+
+	$scope.contrastingColorForTag = function(tag) {
+		return contrastingColor($scope.tags[tag]);
+	};
 
 }]);
 
@@ -487,4 +456,9 @@ function powerSet(items) {
 		result.push(subset);
 	}
 	return result;
+}
+
+function zeroPad(number, width) {
+	width = width || 2;
+	return '0'.repeat(Math.max(width - number.length, 0)) + number;
 }

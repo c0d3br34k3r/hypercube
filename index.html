@@ -17,24 +17,29 @@
 </head>
 
 <body>
-<div class="tabs"><span class="tab" ng-repeat="tab in ::TAB_NAMES" 
-		ng-click="setTab($index)"
-		ng-style="{'background-color': tabIndex == $index ? 'black' : 'white', 'color': tabIndex == $index ? 'white' : 'black'}">{{tab}}</div>
+
+<div class="menu noselect">
+	<div class="menu-item tabs">
+		<span class="tab" ng-repeat="tab in ::TAB_NAMES" 
+				ng-click="setTab($index)"
+				ng-class="tabIndex == $index ? 'tab-selected' : 'tab-unselected'">{{tab}}</span>
+	</div>
+	<div class="menu-item color-selectors">
+		<img ng-repeat="colorItem in ::COLORS"
+				ng-click="toggleColor($index, $event)"
+				ng-src="{{(colorSelected($index) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
+				class="color-selector"
+				height="40" width="40">
+	</div>
+	<div class="menu-item menu-right">
+		<div class="view-indicator" ng-click="toggleView()">{{viewIndex == 0 ? 'Cube: ' + total : 'Collection'}}</div>
+	</div>
+</div>
 
 <div ng-switch="tabIndex">
 	<div ng-switch-when="0">
 
-	<div class="menu">
-		<span class="menu-item menu-left"></span>
-		<span class="menu-item menu-center"><img ng-repeat="colorItem in ::COLORS"
-				ng-click="toggleColor($index, $event)"
-				ng-src="{{(colorSelected($index) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
-				class="colorSelector"
-				height="40" width="40"></span>
-		<span class="menu-item menu-right"><span class="view-indicator noselect" ng-click="toggleView()">{{viewIndex == 0 ? 'Main' : 'Reserve'}}</span><button class="menu-button" ng-click="upload()">Load</button><button class="menu-button" ng-click="saveProgress()">Save</button><button class="menu-button" ng-click="listTrash()">Trash</button><button class="menu-button" ng-click="exportView()">Export</button></span>
-	</div>
-
-	<table class="view" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
+	<table class="view noselect" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
 		<thead>
 			<tr>
 				<th class="label grand-total">Total: {{totals[color].total}}</th>
@@ -62,9 +67,6 @@
 		</tbody>
 	</table>
 
-	<input type="file" class="nodisplay" id="upload" onchange="angular.element(this).scope().readFile(event)">
-	<a class="nodisplay" id="download"></a>
-
 	<div class="card-text" 
 			popup="cardText"
 			popup-padding="10"
@@ -72,42 +74,24 @@
 
 	</div>
 	<div ng-switch-when="1">
-		???
+		{{TAB_NAMES[1]}}
 	</div>
 	<div ng-switch-when="2">
-		<div class="tag-view">
-			<div class="tag-column left">
-				<div class="tag-entry" ng-repeat="tag in tagNames()" 
-						ng-style="{'background-color': tags[tag], 'color': contrastingColorForTag(tag)}">
-					<div class="tag-name">{{tag}}</div>
-					<div class="tag-color">color</div>
-					<div class="tag-close">
-						<svg viewPort="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
-							<g ng-style="{'stroke': contrastingColorForTag(tag)}">
-								<line x1="2" y1="12" x2="12" y2="2" stroke-width="2" />
-								<line x1="2" y1="2" x2="12" y2="12" stroke-width="2" />
-							</g>
-						</svg>
-					</div>
-				</div>
-				<input type="range" min="0" max="255" ng-model="colorPicker[0]">
-				<input type="range" min="0" max="255" ng-model="colorPicker[1]">
-				<input type="range" min="0" max="255" ng-model="colorPicker[2]">
-				<div style="font-family:Courier" ng-style="{'background-color':hexColor(), 'color':contrastingColor(hexColor())}">{{hexColor()}}</div>
-			</div>
-			<div class="tag-column right">
-<select>
-    <option value="1" style="color:red">Apple</option>
-    <option value="2" style="color:yellow">Banana</option>
-    <option value="3" style="color:purple">Grape</option>
-</select>
-			</div>
-		</div>
+		{{TAB_NAMES[2]}}
 	</div>
 	<div ng-switch-when="3">
 		<input type="checkbox" ng-model="settings.showOffColors"></input><span class="setting">Show off-colors</span>
 	</div>
+	<div ng-switch-when="4">
+		<button class="menu-button" ng-click="upload()">Load</button>
+		<button class="menu-button" ng-click="saveProgress()">Save</button>
+		<button class="menu-button" ng-click="listTrash()">Trash</button>
+		<button class="menu-button" ng-click="exportView()">Export</button>
+	</div>
 </div>
+
+<input type="file" class="nodisplay" id="upload" onchange="angular.element(this).scope().readFile(event)">
+<a class="nodisplay" id="download"></a>
 		
 </body>
 
