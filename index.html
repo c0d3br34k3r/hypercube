@@ -24,15 +24,16 @@
 				ng-click="setTab($index)"
 				ng-class="tabIndex == $index ? 'tab-selected' : 'tab-unselected'">{{tab}}</span>
 	</div>
-	<div class="menu-item color-selectors">
+	<div class="menu-item color-selectors" ng-class="{hidden: tabIndex != 0}">
 		<img ng-repeat="colorItem in ::COLORS"
 				ng-click="toggleColor($index, $event)"
 				ng-src="{{(colorSelected($index) ? 'symbols' : 'disabled-symbols') + '/' + colorItem.toLowerCase() + '.svg'}}"
 				class="color-selector"
 				height="40" width="40">
 	</div>
-	<div class="menu-item menu-right">
-		<div class="view-indicator" ng-click="toggleView()">{{viewIndex == 0 ? 'Cube: ' + total : 'Collection'}}</div>
+	<div class="menu-item tabs" ng-class="{hidden: tabIndex >= 2}">
+		<div class="tab" ng-click="setView(0)" ng-class="viewIndex == 0 ? 'tab-selected' : 'tab-unselected'">Cube: {{total}}</div>
+		<div class="tab" ng-click="setView(1)" ng-class="viewIndex == 1 ? 'tab-selected' : 'tab-unselected'">Considerations</div>
 	</div>
 </div>
 
@@ -42,25 +43,32 @@
 	<table class="view noselect" ng-class="viewIndex == 0 ? 'view-main' : 'view-reserve'">
 		<thead>
 			<tr>
-				<th class="label grand-total">Total: {{totals[color].total}}</th>
-				<th class="label center" ng-repeat="manaCost in columnLabels">{{manaCost}} <span class="total" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span></th>
+				<th class="label label-top"><span class="total grand-total" ng-show="totals[color].total">{{totals[color].total}}</th>
+				<th class="label label-top" ng-repeat="manaCost in COLUMN_LABELS">
+					{{manaCost}}
+					<span class="total subtotal" ng-show="totals[color].colTotals[$index]">{{totals[color].colTotals[$index]}}</span>
+				</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="row in cube[viewIndex][color]" ng-init="rowIndex = $index" ng-show="rowNonempty(row) || totals[color].rowTotals[$index]">
-				<td class="label">{{rowLabels[rowIndex]}} <span class="total" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span></td>
+				<td class="label label-side">
+					{{ROW_LABELS[rowIndex]}}
+					<span class="total subtotal" ng-show="totals[color].rowTotals[$index]">{{totals[color].rowTotals[$index]}}</span>
+				</td>
 				<td class="container" ng-repeat="group in row" ng-init="colIndex = $index">
-					<div class="card noselect" ng-repeat="card in group track by $index"
+					<div ng-repeat="card in group track by $index"
+							class="card noselect" 
+							ng-class="{highlighted: highlights.has(card.name)}"
 							ng-click="switchOut(rowIndex, colIndex, $index, $event)" 
 							ng-mouseover="showCard(card, $event)"
 							ng-mouseout="hideCard()"
 							ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)">
-						<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>{{card.name}}
-						<div ng-if="settings.showOffColors" class="off-colors"><img class="off-color" 
-								ng-repeat="color in card.offColors|toArray" 
-								ng-src="{{'symbols/' + color + '.svg'}}"
-								height="10" width="10">
-						</div>		
+						<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>
+						{{card.name}}
+						<div ng-if="settings.showOffColors" class="off-colors">
+							<img class="off-color" ng-repeat="color in card.offColors|toArray" ng-src="{{'symbols/' + color + '.svg'}}">
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -74,7 +82,19 @@
 
 	</div>
 	<div ng-switch-when="1">
-		{{TAB_NAMES[1]}}
+		<div ng-repeat="card in lands[viewIndex][color] track by $index"
+				class="card noselect" 
+				ng-class="{highlighted: highlights.has(card.name)}"
+				ng-click="landSwitchOut($index, $event)" 
+				ng-mouseover="showCard(card, $event)"
+				ng-mouseout="hideCard()"
+				ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)">
+			<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>
+			{{card.name}}
+			<div ng-if="settings.showOffColors" class="off-colors">
+				<img class="off-color" ng-repeat="color in card.offColors|toArray" ng-src="{{'symbols/' + color + '.svg'}}">
+			</div>
+		</div>
 	</div>
 	<div ng-switch-when="2">
 		{{TAB_NAMES[2]}}

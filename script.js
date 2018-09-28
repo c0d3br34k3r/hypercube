@@ -1,30 +1,25 @@
+'use strict';
+
 var app = angular.module('app', []);
 
 app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $http, $window) {
 
-	$http.get('./cube-data.json', {responseType: 'json'}).then(function(result) {
-		$scope.cubeData = result.data;
-		$http.get('./categories.json', {responseType: 'json'}).then(function(result) {
-			setup(result.data);
-			// $http.get('./bce_cube.json', {responseType: 'json'}).then(function(result) {
-				// loadJson(result.data);
-			// });
-		});
-	});
+	$http.get('./cube-data.json', {responseType: 'json'}).then(setup);
 
 	$scope.tabIndex = 0;
 	$scope.viewIndex = 0;
 	$scope.color = 1;
 	$scope.total = 0;
 	$scope.trash = [];
-	$scope.columnLabels = [];
-	$scope.rowLabels = [];
 	$scope.filename = 'new cube.json';
 	$scope.loaded = new Set();
+	$scope.highlights = new Set();
 	$scope.quantities = {};
+	$scope.settings = { showOffColors: true };
+	$scope.COLUMN_LABELS = ['1','2','3','4','5','6','7','8+','0','?'];
+	$scope.ROW_LABELS = ['Creature','Instant','Sorcery','Artifact','Enchantment','Planeswalker'];
 	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
 	$scope.TAB_NAMES = ['Cards', 'Lands', 'Junk', 'Settings', 'Files'];
-	$scope.settings = { showOffColors: true };
 	
 	$scope.setTab = function(index) {
 		$scope.tabIndex = index;
@@ -34,63 +29,29 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		$scope.showOffColors = !$scope.showOffColors;
 	};
 
-	function setup(categories) {
-		$scope.typeMap = createTypeMap(categories.types);
-		$scope.manaCostMap = createManaCostMap(categories.manaCosts);
-		
-		var rows = categories.types.length;
-		var cols = categories.manaCosts.length;
-		
+	function setup(result) {
+		$scope.cubeData = result.data
 		$scope.totals = replicate(32, function() {
 			return {
 				total: 0,
-				rowTotals: newFilledArray(rows, 0),
-				colTotals: newFilledArray(cols, 0),
+				rowTotals: newFilledArray(6, 0),
+				colTotals: newFilledArray(10, 0),
 			};
 		});
-		
-		$scope.cube = replicate(2, function() {
-			return replicate(32, function() {
-				return replicate(rows, function() {
-					return replicate(cols, function() {
-						return [];
-					});
-				});
-			});
-		});
-	}
-
-	function createTypeMap(types) {
-		var typeMap = new Map();
-		for (var i = 0, len = types.length; i < len; i++) {
-			var typeGroups = types[i];
-			for (group of typeGroups.data) {
-				typeMap.set(getBits(group.split(' '), Type), i);
-			}
-			$scope.rowLabels[i] = typeGroups.name;
-		}
-		return typeMap;
-	}
-	
-	function createManaCostMap(manaCosts) {
-		var manaCostMap = new Map();
-		for (var i = 0, len = manaCosts.length; i < len; i++) {
-			var manaCostGroup = manaCosts[i];
-			for (var value = manaCostGroup.data[0], limit = manaCostGroup.data[1] || manaCostGroup.data[0]; value <= limit; value++) {
-				manaCostMap.set(value, i);
-			}
-			$scope.columnLabels[i] = manaCostGroup.name;
-		}
-		return manaCostMap;
+		$scope.cube = multiDimensionalArray([2, 32, 6, 10, 0]);
+		$scope.lands = multiDimensionalArray([2, 32, 0]);
+		loadView(['Yoked Ox', 'Glory Seeker'], 0);
 	}
 	
 	$scope.switchOut = function(row, col, index, event) {
-		var card = $scope.cube[$scope.viewIndex][$scope.color][row][col].splice(index, 1)[0];
-		var destination = event.ctrlKey ? $scope.trash : $scope.cube[1 - $scope.viewIndex][$scope.color][row][col];
+		let card = $scope.cube[$scope.viewIndex][$scope.color][row][col].splice(index, 1)[0];
+		let destination = event.ctrlKey
+				? $scope.trash
+				: $scope.cube[1 - $scope.viewIndex][$scope.color][row][col];
 		insertSorted(destination, card);
-		var increment = ($scope.viewIndex == 0) ? -1 : (event.ctrlKey ? 0 : 1);
+		let increment = ($scope.viewIndex == 0) ? -1 : (event.ctrlKey ? 0 : 1);
 		$scope.total += increment;
-		var totals = $scope.totals[$scope.color];
+		let totals = $scope.totals[$scope.color];
 		totals.total += increment;
 		totals.colTotals[col] += increment;
 		totals.rowTotals[row] += increment;
@@ -116,9 +77,13 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 			default:
 		}
     };
-	
+
 	$scope.toggleView = function() {
 		$scope.viewIndex = 1 - $scope.viewIndex;
+	};
+	
+	$scope.setView = function(viewIndex) {
+		$scope.viewIndex = viewIndex;
 	};
 
 	$scope.toggleColor = function(colorIndex, e) {
@@ -141,22 +106,25 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	}
 	
 	$scope.saveProgress = function() {
-		var contents = {
+		let contents = {
 			main: toCardNames(flatten($scope.cube[0])),
 			reserve: toCardNames(flatten($scope.cube[1]))
 		};
-		var download = document.getElementById('download');
+		let download = document.getElementById('download');
 		download.download = $scope.filename;
-		download.href = 'data:application/json;charset=utf-8;base64,' + utf8ToBase64(JSON.stringify(contents));
+		download.href = 'data:application/json;charset=utf-8;base64,'
+				+ utf8ToBase64(JSON.stringify(contents));
 		download.click();
 	}
 
 	$scope.listTrash = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames($scope.trash).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,'
+				+ utf8ToBase64(toCardNames($scope.trash).join('\n')));
 	}
 
 	$scope.exportView = function() {
-		window.open('data:application/json;charset=utf-8;base64,' + utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')));
+		window.open('data:application/json;charset=utf-8;base64,'
+				+ utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')));
 	}
 	
 	function toCardNames(area) {
@@ -170,19 +138,19 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	};
 
 	$scope.readFile = function(e) {
-		var reader = new FileReader();
-		var file = e.target.files[0];
+		let reader = new FileReader();
+		let file = e.target.files[0];
 		reader.onload = function(e1) {
-			var data = e1.target.result;
+			let data = e1.target.result;
 			switch (file.type) {
 				case 'text/plain':
 					$scope.$apply(function() {
-						loadView(data.split(/\r?\n/), $scope.viewIndex);
+						loadView(data.split(/\r?\n/), $scope.viewIndex, true);
 					});
 					break;
 				case 'application/json':
 					$scope.filename = file.name;
-					var contents = JSON.parse(data);
+					let contents = JSON.parse(data);
 					if (!(contents.main && contents.reserve)) {
 						alert('This JSON file is not in valid cube format.');
 					} else {
@@ -198,22 +166,23 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		reader.readAsText(file, 'UTF-8');
 	};
 	
-	function getFileType() {
-	}
-	
 	function loadJson(contents) {
 		loadView(contents.main, 0);
 		loadView(contents.reserve, 1);
+		$scope.tabIndex = 0;
 	}
 	
-	function loadView(cards, viewIndex) {
-		var badCards = [];
-		for (var item of cards) {
+	function loadView(cards, viewIndex, highlight) {
+		if (highlight) {
+			$scope.highlights.clear();
+		}
+		let badCards = [];
+		for (let item of cards) {
 			var cardName = Diacritics.remove(item.trim()).toLowerCase();
 			if (!cardName || cardName.startsWith('#')) {
 				continue;
 			}
-			var card = $scope.cubeData[cardName];
+			let card = $scope.cubeData[cardName];
 			if (card == null) {
 				badCards.push(item.trim());
 				continue;
@@ -222,18 +191,25 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 				continue;
 			}
 			$scope.loaded.add(card.name);
-			
-			var manaCostCategory = $scope.manaCostMap.get(card.manaCost);
-			var typeCategory = $scope.typeMap.get(card.types);
-			if (typeCategory != null) {
-				var colors = card.types & Type.LAND ? (card.offColors || 0) : card.colors;
-				insertSorted($scope.cube[viewIndex][colors][typeCategory][manaCostCategory], card);
+			if (highlight) {
+				$scope.highlights.add(card.name);
+			}
+			if (viewIndex == 0) {
+				$scope.total++;
+			}
+			if (card.types & Type.LAND) {
+				let colors = card.offColors || 0;
+				insertSorted($scope.lands[viewIndex][colors], card);
+			} else {
+				let manaCostSection = getManaCostSection(card.manaCost);
+				let typeSection = getTypeSection(card.types);
+				let colors = card.colors;
+				insertSorted($scope.cube[viewIndex][colors][typeSection][manaCostSection], card);
 				if (viewIndex == 0) {
-					var totals = $scope.totals[colors];
+					let totals = $scope.totals[colors];
 					totals.total++;
-					$scope.total++;
-					totals.rowTotals[typeCategory]++;
-					totals.colTotals[manaCostCategory]++;
+					totals.rowTotals[typeSection]++;
+					totals.colTotals[manaCostSection]++;
 				}
 			}
 		}
@@ -243,19 +219,13 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	}
 
 	$scope.rowNonempty = function(row) {
-		for (group of row) {
+		for (let group of row) {
 			if (group.length) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	// TAGS
-	
-	$scope.removeTag = function(index) {
-		
-	};
 	
 	// MOUSEOVER CARD TEXT
 
@@ -306,15 +276,15 @@ app.directive('popup', function($parse) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-			var popupName = attrs['popup'];
+			let popupName = attrs['popup'];
 			element.css('position', 'fixed');
-			var padding = Number(attrs['popupPadding'] || 0);
+			let padding = Number(attrs['popupPadding'] || 0);
 			scope[popupName] = {
 				setPosition: function(x, y) {
-					var popupWidth = element[0].offsetWidth;
-					var popupHeight = element[0].offsetHeight;
-					var winHeight = document.documentElement.clientHeight;
-					var winWidth = document.documentElement.clientWidth;
+					let popupWidth = element[0].offsetWidth;
+					let popupHeight = element[0].offsetHeight;
+					let winHeight = document.documentElement.clientHeight;
+					let winWidth = document.documentElement.clientWidth;
 					element.css('left', computeCoord(x, popupWidth, winWidth, padding) + 'px');
 					element.css('top', computeCoord(y, popupHeight, winHeight, padding) + 'px');
 				}
@@ -325,7 +295,7 @@ app.directive('popup', function($parse) {
 
 app.directive('ngRightClick', function($parse) {
     return function(scope, element, attrs) {
-		var expr = $parse(attrs['ngRightClick']);
+		let expr = $parse(attrs['ngRightClick']);
 		element[0].addEventListener('contextmenu', function(e) {
 			scope.$apply(function() {
 				expr(scope, {$event: e});
@@ -336,9 +306,9 @@ app.directive('ngRightClick', function($parse) {
 
 app.filter('toArray', function() {
 	return function(input) {
-		var colors = [];
+		let colors = [];
 		if (input) {
-			for (var i = 0; i < 5; i++) {
+			for (let i = 0; i < 5; i++) {
 				if (input & (1 << i)) {
 					colors.push(COLORS[i]);
 				}
@@ -352,10 +322,6 @@ function computeCoord(pos, popupDim, winDim, padding) {
 	return pos + popupDim + padding <= winDim || pos < winDim / 2
 			? pos + padding
 			: pos - popupDim;
-}
-
-function computeCoord2(pos, popupDim, winDim, padding) {
-	return Math.min(pos + padding, winDim - popupDim);
 }
 
 // pseudo-enums
@@ -382,16 +348,73 @@ var Color = {
 
 var COLORS = ["WHITE", "BLUE", "BLACK", "RED", "GREEN"];
 
+function getTypeSection(types) {
+	if (types & Type.CREATURE)     return 0;
+	if (types & Type.INSTANT)      return 1;
+	if (types & Type.SORCERY)      return 2;
+	if (types & Type.ARTIFACT)     return 3;
+	if (types & Type.ENCHANTMENT)  return 4;
+	if (types & Type.PLANESWALKER) return 5;
+	throw 'unknown type: ' + types;
+}
+
+function getManaCostSection(manaCost) {
+	switch (manaCost) {
+		case 1:  return 0;
+		case 2:  return 1;
+		case 3:  return 2;
+		case 4:  return 3;
+		case 5:  return 4;
+		case 6:  return 5;
+		case 7:  return 6;
+		default: return 7;
+		case 0:  return 8;
+		case -1: return 9;
+	}
+}
+
+var ORDER = [
+	// monocolored
+	1, 2, 4, 8, 16,
+	// colorless
+	0,
+	// allied pairs
+	3, 6, 12, 24, 17,
+	// enemy pairs
+	5, 10, 20, 9, 18,
+	// allied triples
+	7, 14, 28, 25, 19,
+	// enemy triples
+	13, 26, 21, 11, 22,
+	// tetras
+	15, 30, 29, 27, 23,
+	// all
+	31
+];
+
+function multiDimensionalArray(dimensions, offset) {
+	offset = offset || 0;
+	if (offset >= dimensions.length) {
+		return undefined;
+	}
+	let dim = dimensions[offset];
+	let result = new Array(dim);
+	for (let i = 0; i < dim; i++) {
+		result[i] = multiDimensionalArray(dimensions, offset + 1);
+	}
+	return result;
+}
+
 function replicate(count, supplier) {
-	var result = new Array(count);
-	for (var i = 0; i < count; i++) {
+	let result = new Array(count);
+	for (let i = 0; i < count; i++) {
 		result[i] = supplier();
 	}
 	return result;
 }
 
 function newFilledArray(length, value) {
-	var array = new Array(length);
+	let array = new Array(length);
 	array.fill(value);
 	return array;
 }
@@ -401,21 +424,21 @@ function utf8ToBase64(str) {
 }
 
 function getBits(items, itemType) {
-	var bits = 0;
-	for (item of items) {
+	let bits = 0;
+	for (let item of items) {
 		bits |= itemType[item.toUpperCase()];
 	}
 	return bits;
 }
 
 function flatten(array) {
-	var flat = [];
+	let flat = [];
 	recursiveFlatten(array, flat);
 	return flat;
 }
 
 function recursiveFlatten(array, copyTo) {
-	for (item of array) {
+	for (let item of array) {
 		if (Array.isArray(item)) {
 			recursiveFlatten(item, copyTo);
 		} else {
@@ -429,10 +452,10 @@ function insertSorted(array, card) {
 }
 
 function insertionIndex(array, card) {
-	var low = 0;
-	var high = array.length - 1;
+	let low = 0;
+	let high = array.length - 1;
 	while (low <= high) {
-		var mid = Math.floor((low + high) / 2);
+		let mid = Math.floor((low + high) / 2);
 		if (card.name > array[mid].name) {
 			low = mid + 1;
 		} else if (card.name < array[mid].name) {
@@ -444,19 +467,19 @@ function insertionIndex(array, card) {
 	return low;
 }
 
-function powerSet(items) {
-	var result = [];
-	for (var i = 0, combinations = 1 << items.length; i < combinations; i++) {
-		var subset = [];
-		for (var j = 0, len = items.length; j < len; j++) {
-			if (i & (1 << j)) {
-				subset.push(items[j]);
-			}
-		}
-		result.push(subset);
-	}
-	return result;
-}
+// function powerSet(items) {
+	// var result = [];
+	// for (var i = 0, combinations = 1 << items.length; i < combinations; i++) {
+		// var subset = [];
+		// for (var j = 0, len = items.length; j < len; j++) {
+			// if (i & (1 << j)) {
+				// subset.push(items[j]);
+			// }
+		// }
+		// result.push(subset);
+	// }
+	// return result;
+// }
 
 function zeroPad(number, width) {
 	width = width || 2;

@@ -138,22 +138,21 @@ function getManaCost(card) {
 }
 
 function merge(data1, data2, layout) {
-	var isSplit = (layout == 'split' || layout == 'aftermath');
 	return {
-		name: isSplit ? data1.name + ' // ' + data2.name : data1.name,
-		colors: data1.colors | data2.colors,
-		offColors: mergeOffColors(data1.offColors, data2.offColors),
+		name: (layout == 'split' || layout == 'aftermath') ? data1.name + ' // ' + data2.name : data1.name,
+		colors: layout == 'double-faced' ? data1.colors : data1.colors | data2.colors,
+		offColors: mergeOffColors(data1, data2),
 		types: data1.types,
-		manaCost: isSplit ? -1 : data1.manaCost,
+		manaCost: layout == 'split' ? -1 : data1.manaCost,
 		text: data1.text + '\n*** ' + layout.toUpperCase() + ' ***\n' + data2.text
 	};
 }
 
-function mergeOffColors(colors1, colors2) {
-	if (!colors1 && !colors2) {
+function mergeOffColors(data1, data2) {
+	if (!data1.offColors && !data2.offColors) {
 		return undefined;
 	}
-	return (colors1 || 0) | (colors2 || 0);
+	return (data1.offColors || 0) | (data2.offColors || 0) & ~(data1.colors || 0) & ~(data2.colors || 0);
 }
 
 function getFullText(card) {
@@ -207,15 +206,15 @@ var COLOR_BITS = toBitCodes(['White','Blue','Black','Red','Green']);
 var COLOR_CODE_BITS = toBitCodes(['W','U','B','R','G']);
 
 var TYPE_BITS = toBitCodes([
-	'Tribal',
-	'Instant',
-	'Sorcery',
-	'Enchantment',
-	'Artifact',
-	'Land',
-	'Creature',
-	'Planeswalker',
-	'Conspiracy']);
+	'Tribal',       // 1
+	'Instant',      // 2
+	'Sorcery',      // 4
+	'Enchantment',  // 8
+	'Artifact',     // 16
+	'Land',         // 32
+	'Creature',     // 64
+	'Planeswalker', // 128
+	'Conspiracy']); // 256
 
 var BASIC_LAND_BITS = toBitCodes([
 	'Plains',
