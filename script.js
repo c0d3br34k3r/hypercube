@@ -40,7 +40,6 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		});
 		$scope.cube = multiDimensionalArray([2, 32, 6, 10, 0]);
 		$scope.lands = multiDimensionalArray([2, 32, 0]);
-		loadView(['Yoked Ox', 'Glory Seeker'], 0);
 	}
 	
 	$scope.switchOut = function(row, col, index, event) {
@@ -59,24 +58,6 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 			$scope.loaded.delete(card);
 		}
 	}
-	
-	$scope.shortcut =  function(event) {
-		switch (event.key) {
-			case '`':
-				$scope.toggleView();
-				break;
-			case 'ArrowRight':
-				rotateForward();
-				break;
-			case 'ArrowLeft':
-				rotateBackward();
-				break;
-			case 'j':
-				$scope.color = ($scope.color + 1) & 0x1F;
-				break;
-			default:
-		}
-    };
 
 	$scope.toggleView = function() {
 		$scope.viewIndex = 1 - $scope.viewIndex;
@@ -178,7 +159,7 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 		}
 		let badCards = [];
 		for (let item of cards) {
-			var cardName = Diacritics.remove(item.trim()).toLowerCase();
+			var cardName = removeDiacritics(item.trim()).toLowerCase();
 			if (!cardName || cardName.startsWith('#')) {
 				continue;
 			}
@@ -247,6 +228,22 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	$scope.keydown = function(event) {
 		if (event.key == 'Shift') {
 			$scope.card.show = true;
+		} else {
+			switch (event.key) {
+				case '`':
+					$scope.toggleView();
+					break;
+				case 'ArrowRight':
+					rotateForward();
+					break;
+				case 'ArrowLeft':
+					rotateBackward();
+					break;
+				case 'j':
+					$scope.color = ($scope.color + 1) & 0x1F;
+					break;
+				default:
+			}
 		}
 	}
 	

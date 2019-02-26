@@ -6,24 +6,24 @@ function mtgjsoncallback(mtgjson) {
 
 window.onload = function() {
 	for (var setCode of Object.keys(allSets)) {
-		console.log('processing... ' + setCode);
 		var set = allSets[setCode];
-		if (setCode == 'pMEI') {
-			processSet(set, function(card) { return ORIGINAL_PROMOS.has(card.name); });
-		} else if (!DISALLOWED_TYPES.has(set.type)
-				&& !DISALLOWED_SETS.has(setCode)
-				&& !setCode.startsWith('DD3_')) {
-			processSet(set, function(card) { return true; });
+		console.log(setCode + ' (' + set.type + ')');
+		if (setCode == 'PMEI') {
+			processSet(set, function(card) { 
+				return ORIGINAL_PROMOS.has(card.name); 
+			});
+		} else if (ALLOWED_TYPES.has(set.type)) {
+			processSet(set, function(card) {
+				return true; 
+			});
 		}
 	}
-	document.body.innerHTML = 
-		// Object.values(result).map(function(card) { return card.name; }).join('<br>');
-		JSON.stringify(result);
+	document.body.innerHTML = JSON.stringify(result);
 };
 
-var DISALLOWED_TYPES = new Set(['promo', 'un', 'vanguard']);
-var DISALLOWED_SETS = new Set(['ITP', 'RQS', 'CST', 'CEI', 'CPK', 'CED', 'MGB', 'FRF_UGIN', 'PCA', 'ATH']);
-var ALLOWED_LAYOUTS = new Set(['normal', 'split', 'flip', 'double-faced', 'leveler', 'meld', 'aftermath']);
+var ALLOWED_TYPES = new Set(['core', 'commander', 'draft_innovation', 'expansion', 'planechase', 'box']);
+var ALLOWED_LAYOUTS = new Set(['normal', 'split', 'flip', 'double-faced', 'leveler', 'saga', 'meld', 'aftermath']);
+var NORMAL_LAYOUTS = new Set(['normal', 'leveler', 'saga']);
 
 var ORIGINAL_PROMOS = new Set([
 	'Arena',
@@ -42,7 +42,7 @@ function processSet(set, filter) {
 		if (ALLOWED_LAYOUTS.has(card.layout) && filter(card) && !seen.has(card.name)) {
 			seen.add(card.name);
 			var key = toKey(card.name);
-			if (card.names && card.layout != 'normal') {
+			if (card.names && card.names.length > 1) {
 				partial[card.name] = getData(card);
 				checkAllParts(card.names, card.layout);
 			} else {
@@ -96,7 +96,7 @@ function getColors(card) {
 		}
 	}
 	if (card.colors) {
-		return getBits(card.colors, COLOR_BITS);
+		return getBits(card.colors, COLOR_CODE_BITS);
 	}
 	return 0;
 }
@@ -134,7 +134,7 @@ function getManaCost(card) {
 	if (!card.manaCost || card.manaCost.includes('X')) {
 		return -1;
 	}
-	return card.cmc;
+	return card.convertedManaCost;
 }
 
 function merge(data1, data2, layout) {
@@ -166,11 +166,11 @@ function getFullText(card) {
 	if (colorIndicator) {
 		fullText.push(colorIndicator + ' ');
 	}
-	if (card.supertypes) {
+	if (card.supertypes && card.supertypes.length) {
 		fullText.push(card.supertypes.join(' ') + ' ');
 	}
 	fullText.push(card.types.join(' '));
-	if (card.subtypes) {
+	if (card.subtypes && card.subtypes.length) {
 		fullText.push('\u2014' + card.subtypes.join(' '));
 	}
 	if (card.text) {
@@ -188,11 +188,8 @@ function getFullText(card) {
 }
 
 function getColorIndicator(card) {
-	var manaCostColors = new Set();
-	if ((!card.manaCost || !card.manaCost.replace(/[^WUBRG]/g, '')) && card.colors) {
-		return '(' + card.colors.map(function(color) {
-			return COLOR_CODES[color]; 
-		}).join('') + ')';
+	if ((!card.manaCost || !card.manaCost.replace(/[^WUBRG]/g, '')) && card.colors && card.colors.length) {
+		return '(' + card.colors.join('') + ')';
 	}
 	return null;
 }
@@ -200,8 +197,6 @@ function getColorIndicator(card) {
 function toKey(name) {
 	return removeDiacritics(name).toLowerCase();
 }
-
-var COLOR_BITS = toBitCodes(['White','Blue','Black','Red','Green']);
 
 var COLOR_CODE_BITS = toBitCodes(['W','U','B','R','G']);
 
@@ -230,19 +225,3 @@ function toBitCodes(keys) {
 	}
 	return result;
 }
-
-var COLOR_CODES = {
-	White: 'W',
-	Blue: 'U',
-	Black: 'B',
-	Red: 'R',
-	Green: 'G'
-};
-
-// var BASIC_LAND_TYPES = {
-	// 'Plains': 'W',
-	// 'Island': 'U',
-	// 'Swamp': 'B',
-	// 'Mountain': 'R',
-	// 'Forest': 'G'
-// };

@@ -148,7 +148,7 @@ body {
 }
 
 .highlighted {
-	background-color: yellow;
+	/* background-color: yellow; */
 }
 
 .card:not(:last-child) {
