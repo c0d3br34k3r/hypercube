@@ -138,12 +138,13 @@ function getManaCost(card) {
 }
 
 function merge(data1, data2, layout) {
+	// TODO: aftermath cards; split cards use combined cmc
 	return {
 		name: (layout == 'split' || layout == 'aftermath') ? data1.name + ' // ' + data2.name : data1.name,
 		colors: layout == 'double-faced' ? data1.colors : data1.colors | data2.colors,
 		offColors: mergeOffColors(data1, data2),
 		types: data1.types,
-		manaCost: layout == 'split' ? -1 : data1.manaCost,
+		manaCost: (layout == 'split' && !data2.text.startsWith('Aftermath')) ? -1 : data1.manaCost,
 		text: data1.text + '\n*** ' + layout.toUpperCase() + ' ***\n' + data2.text
 	};
 }

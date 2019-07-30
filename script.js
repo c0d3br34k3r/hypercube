@@ -4,8 +4,6 @@ var app = angular.module('app', []);
 
 app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $http, $window) {
 
-	$http.get('./cube-data.json', {responseType: 'json'}).then(setup);
-
 	$scope.tabIndex = 0;
 	$scope.viewIndex = 0;
 	$scope.color = 1;
@@ -21,26 +19,28 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
 	$scope.TAB_NAMES = ['Cards', 'Lands', 'Junk', 'Settings', 'Files'];
 	
+	$scope.cubeData = {};
+	for (let card of cards) {
+		$scope.cubeData[removeDiacritics(card.name).toLowerCase()] = card;
+	}
+	
+	$scope.totals = replicate(32, function() {
+		return {
+			total: 0,
+			rowTotals: newFilledArray(6, 0),
+			colTotals: newFilledArray(10, 0),
+		};
+	});
+	$scope.cube = multiDimensionalArray([2, 32, 6, 10, 0]);
+	$scope.lands = multiDimensionalArray([2, 32, 0]);
+	
 	$scope.setTab = function(index) {
 		$scope.tabIndex = index;
 	};
 	
 	$scope.test = function() {
 		$scope.showOffColors = !$scope.showOffColors;
-	};
-
-	function setup(result) {
-		$scope.cubeData = result.data
-		$scope.totals = replicate(32, function() {
-			return {
-				total: 0,
-				rowTotals: newFilledArray(6, 0),
-				colTotals: newFilledArray(10, 0),
-			};
-		});
-		$scope.cube = multiDimensionalArray([2, 32, 6, 10, 0]);
-		$scope.lands = multiDimensionalArray([2, 32, 0]);
-	}
+	};	
 	
 	$scope.switchOut = function(row, col, index, event) {
 		let card = $scope.cube[$scope.viewIndex][$scope.color][row][col].splice(index, 1)[0];
@@ -182,7 +182,7 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 				let colors = card.offColors || 0;
 				insertSorted($scope.lands[viewIndex][colors], card);
 			} else {
-				let manaCostSection = getManaCostSection(card.manaCost);
+				let manaCostSection = getManaCostSection(card.cost);
 				let typeSection = getTypeSection(card.types);
 				let colors = card.colors;
 				insertSorted($scope.cube[viewIndex][colors][typeSection][manaCostSection], card);
@@ -481,4 +481,10 @@ function insertionIndex(array, card) {
 function zeroPad(number, width) {
 	width = width || 2;
 	return '0'.repeat(Math.max(width - number.length, 0)) + number;
+}
+
+var cards;
+
+function initCards(json) {
+	cards = json;
 }
