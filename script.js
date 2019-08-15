@@ -242,6 +242,12 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 				case 'j':
 					$scope.color = ($scope.color + 1) & 0x1F;
 					break;
+				case 's':
+					$scope.saveProgress();
+					break;
+				case 'l':
+					$scope.upload();
+					break;
 				default:
 			}
 		}
