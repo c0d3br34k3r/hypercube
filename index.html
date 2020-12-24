@@ -65,7 +65,6 @@
 							ng-mouseover="showCard(card, $event)"
 							ng-mouseout="hideCard()"
 							ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)">
-						<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>
 						{{card.name}}
 						<div ng-if="settings.showOffColors" class="off-colors">
 							<img class="off-color" ng-repeat="color in card.offColors|toArray" ng-src="{{'symbols/' + color + '.svg'}}">
@@ -90,7 +89,6 @@
 				ng-mouseover="showCard(card, $event)"
 				ng-mouseout="hideCard()"
 				ng-mousemove="cardText.setPosition($event.clientX, $event.clientY)">
-			<span class="quantity" ng-show="quantities[card] && quantities[card] > 1">{{quantities[card.name]}}</span>
 			{{card.name}}
 			<div ng-if="settings.showOffColors" class="off-colors">
 				<img class="off-color" ng-repeat="color in card.offColors|toArray" ng-src="{{'symbols/' + color + '.svg'}}">

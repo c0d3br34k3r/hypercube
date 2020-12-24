@@ -12,8 +12,8 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	$scope.filename = 'new cube.json';
 	$scope.loaded = new Set();
 	$scope.highlights = new Set();
-	$scope.quantities = {};
 	$scope.settings = { showOffColors: true };
+	
 	$scope.COLUMN_LABELS = ['1','2','3','4','5','6','7','8+','0','?'];
 	$scope.ROW_LABELS = ['Creature','Instant','Sorcery','Artifact','Enchantment','Planeswalker'];
 	$scope.COLORS = ['white', 'blue', 'black', 'red', 'green'];
@@ -37,10 +37,6 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	$scope.setTab = function(index) {
 		$scope.tabIndex = index;
 	};
-	
-	$scope.test = function() {
-		$scope.showOffColors = !$scope.showOffColors;
-	};	
 	
 	$scope.switchOut = function(row, col, index, event) {
 		let card = $scope.cube[$scope.viewIndex][$scope.color][row][col].splice(index, 1)[0];
@@ -99,13 +95,13 @@ app.controller('Controller', ['$scope', '$http', '$window', function ($scope, $h
 	}
 
 	$scope.listTrash = function() {
-		window.open('data:application/json;charset=utf-8;base64,'
-				+ utf8ToBase64(toCardNames($scope.trash).join('\n')));
+		window.open('data:application/json;charset=UTF-8;base64,'
+				+ utf8ToBase64(toCardNames($scope.trash).join('\n')), 'test');
 	}
 
 	$scope.exportView = function() {
-		window.open('data:application/json;charset=utf-8;base64,'
-				+ utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')));
+		window.open('data:application/json;charset=UTF-8;base64,'
+				+ utf8ToBase64(toCardNames(flatten($scope.cube[$scope.viewIndex])).join('\n')), 'test');
 	}
 	
 	function toCardNames(area) {
